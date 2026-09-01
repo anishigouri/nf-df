@@ -1,0 +1,12 @@
+node_modules
+client/node_modules
+client/dist
+.git
+.env
+uploads
+screenshots
+downloads
+planilhas
+.claude
+.mcp.json
+PROGRESSO.md

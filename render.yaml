@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: nf-df
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter # Free nao tem RAM suficiente pra rodar Node + Chromium headless com folga
+    numInstances: 1 # obrigatorio: o job fica em memoria de um unico processo (ver server/gerenciadorJobs.js)
+    healthCheckPath: /
+    envVars:
+      - key: DF_HEADLESS
+        value: "true" # sem isso o Chromium tenta abrir janela e quebra (Render nao tem display)
+      - key: DF_CNPJ_ESTABELECIMENTO
+        value: "40.432.544/0758-21"
+      - key: DF_DELAY_MS
+        value: "5000"
+      # DF_DEBUG_CDP_PORT nao deve ser definido em producao (ver src/config.js)
+      # Login/senha do ISS Online DF nunca vao aqui -- sao digitados no front-end
+      # a cada sessao e enviados direto pro backend por requisicao.

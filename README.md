@@ -94,6 +94,38 @@ Em produção, basta rodar `npm run build` dentro de `client/` e depois
 `npm start` na raiz — o próprio Express passa a servir os arquivos estáticos
 do build em `client/dist`.
 
+## 4. Deploy no Render
+
+O projeto sobe como **um único Web Service Docker** no Render (front-end e
+backend juntos, exatamente como descrito na seção 3 para produção — o
+Express serve o build do React e a API no mesmo domínio, sem CORS). Veja o
+[Dockerfile](Dockerfile) e o [render.yaml](render.yaml).
+
+Passos:
+
+1. No Render, "New +" → "Blueprint" e aponte pro repositório (ele lê o
+   `render.yaml` automaticamente) — ou "New +" → "Web Service", ambiente
+   **Docker**, Dockerfile Path `./Dockerfile`.
+2. Confira as env vars (o `render.yaml` já define `DF_HEADLESS=true`,
+   `DF_CNPJ_ESTABELECIMENTO` e `DF_DELAY_MS`). Login e senha do ISS Online DF
+   **não** entram aqui — continuam sendo digitados no front a cada sessão.
+3. **Não defina `DF_DEBUG_CDP_PORT` em produção** (ver comentário em
+   [src/config.js](src/config.js) — esse endpoint permite qualquer processo
+   local controlar o navegador).
+4. Plano: use pelo menos o **Starter** (não o Free) — Chromium headless
+   precisa de RAM confortável e o Free hiberna por inatividade, o que pode
+   derrubar um lote no meio do processamento.
+5. **Só uma instância** (`numInstances: 1`, já no `render.yaml`) — o estado
+   dos jobs fica em memória de um único processo
+   ([server/gerenciadorJobs.js](server/gerenciadorJobs.js)), então não dá pra
+   escalar horizontalmente. Por esse mesmo motivo, evite fazer um novo
+   deploy enquanto um lote estiver rodando (o Render troca de instância e o
+   job em andamento se perde).
+
+A tag da imagem base no Dockerfile (`mcr.microsoft.com/playwright:v1.62.1-jammy`)
+precisa bater com a versão do pacote `playwright` no `package-lock.json` — se
+atualizar o Playwright, atualize a tag junto.
+
 ## Avisos importantes
 
 - Rode com `DF_HEADLESS=false` no `.env` pra acompanhar visualmente o que o
