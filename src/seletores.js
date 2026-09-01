@@ -91,17 +91,19 @@ export const ACOES = {
   // o botao visivel "Gravar" tem id btnAssinar e abre um modal perguntando se
   // quer assinar com certificado digital
   botaoGravar: "#btnAssinar",
-  // Ainda nao confirmado num Gravar real. Lista de seletores CSS (Playwright
-  // trata "," como "ou") restrita a botao/link/input -- um "text=Nao" solto
-  // ja bateu numa <option> de outro combobox que tambem tinha "Nao" no meio
-  // do texto (invisivel, travava o click em timeout). Se ainda assim nao
-  // bater, emitirNota() em roboDf.js aborta ANTES de gravar de verdade e
-  // tira screenshot do modal real pra corrigir aqui.
-  modalAssinatura_botaoNao: 'button:has-text("Não"), a:has-text("Não"), input[value="Não"]',
+  // Modal "Deseja assinar a Nota Eletronica com Certificado Digital?"
+  // (#modalAssina) -- confirmado pelo HTML real em 01/09/2026. O botao "Nao"
+  // e o link #btnAssinaSenha, que chama closeModalAssinaSenha() e fecha o
+  // modal sem assinar digitalmente (o botao "Sim" seria #btnAssinaCert, nao
+  // usado aqui).
+  modalAssinatura_botaoNao: "#btnAssinaSenha",
   // apos escolher "Nao" no modal, este e o botao que efetivamente grava a nota
   botaoGravarFinal: "#btnGravarAssinado",
-  // Ainda sem seletor confirmado -- emitirNota() sempre tira screenshot e
-  // salva o texto da pagina depois de gravar de verdade, entao mesmo sem
-  // bater aqui a evidencia fica salva pra confirmar o numero manualmente.
-  numeroNotaGerada: "#TODO_numero_nota_gerada",
+  // Confirmado pelo HTML real em 01/09/2026 (nota real gravada, numero
+  // 28557): <span id="lblNumNota">28557</span>. Confirmado tambem pelo
+  // usuario que essa tela de recibo aparece SOZINHA logo apos o Gravar
+  // final, dentro do proprio frame da nota (nao precisa clicar em nada tipo
+  // "visualizar/imprimir"), entao o frame.waitForSelector em emitirNota()
+  // (roboDf.js) bate direto.
+  numeroNotaGerada: "#lblNumNota",
 };

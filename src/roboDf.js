@@ -174,7 +174,19 @@ async function esperarCarregamentoSumir(frame, timeoutMs = 10000) {
 // -- esperaExtraMs deixa dar uma folga maior pra esses casos especificos em
 // vez de um timeout fixo curto pra todos.
 async function selecionarEEsperar(frame, seletor, valor, esperaExtraMs = 800) {
-  await frame.selectOption(seletor, valor);
+  try {
+    await frame.selectOption(seletor, valor);
+  } catch (err) {
+    // O postback que habilita/popula o proximo select as vezes demora mais
+    // que o timeout padrao do Playwright (confirmado em 01/09/2026: 30s
+    // esperando #ddlTrbNacional sair de "disabled" e ganhar opcoes, logo
+    // depois de termos adicionado mais passos -- CNPJ do tomador e Valor
+    // Total -- antes do inicio da cascata). Da mais uma chance com folga
+    // maior antes de desistir de vez.
+    await frame.waitForLoadState("networkidle").catch(() => {});
+    await frame.waitForTimeout(3000);
+    await frame.selectOption(seletor, valor);
+  }
   await frame.waitForLoadState("networkidle").catch(() => {});
   await esperarCarregamentoSumir(frame);
   await frame.waitForTimeout(esperaExtraMs);
@@ -260,7 +272,12 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
   await frame.fill(FORMULARIO_NOTA.valorServico, String(dados.valorServico));
   await frame.locator(FORMULARIO_NOTA.valorServico).press("Tab");
   await frame.waitForLoadState("networkidle").catch(() => {});
-  await frame.waitForTimeout(500);
+  // folga maior (1500ms em vez de 500ms) pra deixar o postback do Valor
+  // Total (recalculo da Base de Calculo/Aliquota do ISSQN) assentar de vez
+  // antes de comecar a cascata -- reduz a chance de colisao com o postback
+  // seguinte (Atividade Municipal), que chegou a travar em timeout
+  // (confirmado em 01/09/2026).
+  await frame.waitForTimeout(1500);
 
   // cascata de selects -- cada um so populariza as opcoes (ou registra a
   // escolha no servidor via postback/AJAX) depois que o anterior e
