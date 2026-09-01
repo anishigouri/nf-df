@@ -106,4 +106,17 @@ export const ACOES = {
   // "visualizar/imprimir"), entao o frame.waitForSelector em emitirNota()
   // (roboDf.js) bate direto.
   numeroNotaGerada: "#lblNumNota",
+
+  // Descoberto por screenshot em 01/09/2026 (nota real 28580, 2a nota de um
+  // lote de 2, ver erro_gravar_linha_2.png): as vezes escolher "Nao" no modal
+  // de assinatura ja grava a nota na hora e abre direto um modal separado
+  // "Nota Eletronica" (recibo, com QRCode/codigo de autenticidade e botoes
+  // Imprimir/Enviar por Email/Fechar) por cima do formulario -- SEM passar
+  // por #btnGravarAssinado, que nesse caso nunca fica visivel e trava em
+  // timeout mesmo com a nota ja emitida de verdade. Ainda sem o HTML real
+  // desse modal (so o screenshot), por isso o numero e lido "no bruto" via
+  // innerText + regex em vez de um id (ver extrairNumeroDoRecibo em
+  // roboDf.js) -- e mais resiliente a nao sabermos a estrutura exata.
+  reciboRotuloNumero: "text=Número da Nota Fiscal",
+  reciboBotaoFechar: "text=Fechar",
 };

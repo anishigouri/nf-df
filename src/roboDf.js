@@ -28,9 +28,13 @@ export class CredenciaisInvalidasError extends ErroEmissaoNota {}
  * site nem carregam e nada funciona).
  */
 export async function abrirNavegador() {
+  const args = ["--disable-blink-features=AutomationControlled"];
+  if (config.DF_DEBUG_CDP_PORT) {
+    args.push(`--remote-debugging-port=${config.DF_DEBUG_CDP_PORT}`);
+  }
   const browser = await chromium.launch({
     headless: config.DF_HEADLESS,
-    args: ["--disable-blink-features=AutomationControlled"],
+    args,
   });
   const context = await browser.newContext({
     userAgent:
@@ -132,9 +136,34 @@ async function esperarFrame(page, predicado, timeoutMs) {
   return null;
 }
 
+// O grupo "Nota Eletronica" do menu lateral (RadTreeView do Telerik) abre
+// certinho na primeira nota do lote, mas em notas seguintes as vezes fica
+// preso "nao visivel" por 30s inteiros mesmo com o recibo da nota anterior
+// ja fechado direitinho (confirmado em lote de 2 em 01/09/2026) -- como o
+// Playwright ja tenta por 30s sozinho antes de desistir, nao e falta de
+// tempo, e o widget client-side que fica dessincronizado apos o postback do
+// Gravar. page.goto(page.url()) (em vez de page.reload(), que arriscaria um
+// prompt de "reenviar formulario" ja que a pagina atual veio de um
+// postback) recarrega a mesma URL via GET puro, reinicializando o menu do
+// zero -- a selecao de estabelecimento fica guardada na sessao do servidor,
+// entao sobrevive ao reload.
+async function clicarGrupoNotaEletronica(page) {
+  const locator = page.locator(MENU.grupoNotaEletronica).first();
+  try {
+    await locator.click({ timeout: 8000 });
+    return;
+  } catch {
+    const caminhoPrint = path.join(PASTA_SCREENSHOTS, "erro_menu_nota_eletronica.png");
+    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    await page.goto(page.url(), { waitUntil: "networkidle" });
+    await page.waitForTimeout(1000);
+    await locator.click();
+  }
+}
+
 /** Abre o menu lateral e navega ate o formulario de nova nota, que carrega dentro de um iframe. */
 export async function abrirFormularioNovaNota(page) {
-  await page.locator(MENU.grupoNotaEletronica).first().click();
+  await clicarGrupoNotaEletronica(page);
   await page.waitForTimeout(500);
 
   await Promise.all([page.waitForLoadState("networkidle"), page.locator(MENU.linkNovaNota).click()]);
@@ -232,7 +261,7 @@ function mapearDadosDaPlanilha(linha) {
  * Preenche o formulario da nota no iframe. Retorna sem gravar -- quem chama
  * decide se confirma a gravacao (ver emitirNota).
  */
-async function preencherFormulario(frame, linha, dataCompetencia) {
+async function preencherFormulario(page, frame, linha, numeroLinha, dataCompetencia) {
   const dados = mapearDadosDaPlanilha(linha);
 
   if (!dados.cnpjCliente) throw new ErroEmissaoNota("Linha sem CNPJ CLIENTE preenchido.");
@@ -285,20 +314,45 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
   // fixo, porque um delay fixo curto demais faz o site achar que o campo
   // ficou vazio (confirmado: modal "Atencao" pedindo pra preencher Tributacao
   // do ISSQN/Regime Especial/PIS-COFINS-CSLL mesmo com o valor selecionado).
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlAtivMunicipal, VALORES_FIXOS.atividadeMunicipal);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTrbNacional, VALORES_FIXOS.tributacaoNacional);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlNBS, VALORES_FIXOS.nbs);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTribISSQN, VALORES_FIXOS.tribISSQN);
-  // Regime Especial precisa vir ANTES de Tipo de Retencao do ISSQN -- essa e
-  // a ordem real do formulario (confirmada pelo HTML que o usuario mandou em
-  // 01/09/2026: Regime Especial aparece antes de Tipo de Retencao do ISSQN
-  // na pagina). Selecionar na ordem trocada faz o site nunca popular a opcao
-  // "1" em #ddlTipoRetencao, e frame.selectOption trava em timeout
-  // ("did not find some options") esperando por uma opcao que nunca aparece.
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlRegimeEspecial, VALORES_FIXOS.regimeEspecial);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoISSQN, VALORES_FIXOS.tipoRetencaoISSQN, 3000);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
-  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
+  //
+  // Falha aqui dentro nunca teve screenshot -- so descobrimos que o #ddlNBS
+  // as vezes fica preso "disabled" sem opcoes (confirmado em lote de 7 em
+  // 01/09/2026, 1 de 7 linhas) porque o erro generico do processarLote nao
+  // guarda nenhuma evidencia visual. Captura aqui, junto com o modal
+  // "Atencao" (se for essa a causa real do travamento).
+  try {
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlAtivMunicipal, VALORES_FIXOS.atividadeMunicipal);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTrbNacional, VALORES_FIXOS.tributacaoNacional);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlNBS, VALORES_FIXOS.nbs);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTribISSQN, VALORES_FIXOS.tribISSQN);
+    // Regime Especial precisa vir ANTES de Tipo de Retencao do ISSQN -- essa e
+    // a ordem real do formulario (confirmada pelo HTML que o usuario mandou em
+    // 01/09/2026: Regime Especial aparece antes de Tipo de Retencao do ISSQN
+    // na pagina). Selecionar na ordem trocada faz o site nunca popular a opcao
+    // "1" em #ddlTipoRetencao, e frame.selectOption trava em timeout
+    // ("did not find some options") esperando por uma opcao que nunca aparece.
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlRegimeEspecial, VALORES_FIXOS.regimeEspecial);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoISSQN, VALORES_FIXOS.tipoRetencaoISSQN, 3000);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
+    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
+  } catch (err) {
+    const caminhoPrint = path.join(PASTA_SCREENSHOTS, `erro_cascata_linha_${numeroLinha}.png`);
+    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    const modalAtencao = page.locator(MODAL_ATENCAO.seletor).first();
+    const modalAtencaoApareceu = await modalAtencao.isVisible().catch(() => false);
+    if (modalAtencaoApareceu) {
+      const mensagem = await modalAtencao.innerText().catch(() => "(nao consegui ler o texto do modal)");
+      await page.locator(MODAL_ATENCAO.botaoOk).first().click().catch(() => {});
+      throw new ErroEmissaoNota(
+        `Site recusou um campo da cascata de tributacao (linha ${numeroLinha}): ${mensagem.trim()}. ` +
+          `Screenshot do estado real salvo em ${caminhoPrint}.`
+      );
+    }
+    throw new ErroEmissaoNota(
+      `Falha na cascata de tributacao (linha ${numeroLinha}): ${err.message}. ` +
+        `Screenshot do estado real salvo em ${caminhoPrint}.`
+    );
+  }
 
   if (dataCompetencia) {
     // o campo tambem tem onchange disparando __doPostBack (igual aos combos
@@ -333,6 +387,49 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
   }
 }
 
+// Depois de escolher "Nao" no modal de assinatura, o site tanto pode exigir
+// mais um clique em #btnGravarAssinado quanto pode ja gravar a nota na hora
+// e mostrar direto o recibo "Nota Eletronica" com o numero (ver comentario
+// de ACOES.reciboRotuloNumero em seletores.js) -- e esse recibo abre dentro
+// de um IFRAME ANINHADO (id="iframeModal", criado via NC.modalGeneric() --
+// confirmado pelo HTML real que o usuario mandou em 01/09/2026), dentro do
+// proprio frame da nota. Por isso varre TODOS os frames da pagina
+// (page.frames(), que inclui o frame principal e qualquer aninhado, nao
+// importa a profundidade) em vez de so [page, frame] -- um frame.locator ou
+// page.locator sozinho nao enxerga pra dentro de um iframe aninhado.
+//
+// Poll manual em vez de Promise.race dos dois .waitFor() porque um .waitFor
+// que estoura o timeout REJEITA a promise, e o Promise.race rejeitaria o
+// conjunto todo mesmo que o outro desfecho fosse aparecer um instante
+// depois. Retorna o frame onde o recibo apareceu, ou null se so o botao
+// apareceu (ou se nenhum dos dois apareceu no timeout -- mantendo o
+// comportamento antigo de deixar o clique seguinte estourar o timeout
+// padrao do Playwright).
+async function esperarReciboOuBotaoGravar(page, frame, timeoutMs = 25000) {
+  const inicio = Date.now();
+  while (Date.now() - inicio < timeoutMs) {
+    if (await frame.locator(ACOES.botaoGravarFinal).isVisible().catch(() => false)) return null;
+    for (const candidato of page.frames()) {
+      if (await candidato.locator(ACOES.reciboRotuloNumero).first().isVisible().catch(() => false)) {
+        return candidato;
+      }
+    }
+    await page.waitForTimeout(400);
+  }
+  return null;
+}
+
+// Le o numero da nota direto do texto do recibo (innerText + regex) em vez
+// de um id, porque ainda so temos o screenshot desse modal, nao o HTML real.
+async function extrairNumeroDoRecibo(contexto) {
+  const texto = await contexto
+    .locator("body")
+    .innerText()
+    .catch(() => "");
+  const match = texto.match(/N[uú]mero da Nota Fiscal\s*\n?\s*(\d+)/i);
+  return match ? match[1] : null;
+}
+
 /**
  * Preenche e emite uma nota. Retorna o numero da NFS-e gerada.
  *
@@ -341,7 +438,7 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
  */
 export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dataCompetencia = null } = {}) {
   const frame = await abrirFormularioNovaNota(page);
-  await preencherFormulario(frame, linha, dataCompetencia);
+  await preencherFormulario(page, frame, linha, numeroLinha, dataCompetencia);
 
   if (dryRun) {
     const caminhoPrint = path.join(PASTA_SCREENSHOTS, `dry_run_linha_${numeroLinha}.png`);
@@ -354,6 +451,7 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
   // "Nao". Se qualquer passo desse bloco falhar (ex.: o seletor do "Nao"
   // nao bater), tira screenshot do estado real na hora e aborta ANTES de
   // arriscar gravar de verdade.
+  let numeroNotaConhecido = null;
   try {
     await frame.locator(ACOES.botaoGravar).click();
     await frame.waitForTimeout(1500);
@@ -384,10 +482,27 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
     await frame.locator(ACOES.modalAssinatura_botaoNao).first().click();
     await frame.waitForTimeout(1000);
 
-    await Promise.all([
-      frame.waitForLoadState("networkidle").catch(() => {}),
-      frame.locator(ACOES.botaoGravarFinal).click(),
-    ]);
+    const contextoRecibo = await esperarReciboOuBotaoGravar(page, frame);
+
+    if (contextoRecibo) {
+      // A nota ja foi gravada -- o site pulou #btnGravarAssinado e foi direto
+      // pro recibo (ver comentario de esperarReciboOuBotaoGravar acima).
+      // Fecha o recibo ANTES de checar se leu o numero -- se ficasse aberto
+      // (ex.: regex nao bateu), a proxima nota do lote travava tentando
+      // abrir o menu "Nota Eletronica", coberto pelo recibo ainda aberto.
+      numeroNotaConhecido = await extrairNumeroDoRecibo(contextoRecibo);
+      await contextoRecibo.locator(ACOES.reciboBotaoFechar).first().click().catch(() => {});
+      if (!numeroNotaConhecido) {
+        throw new ErroEmissaoNota(
+          `Recibo da nota apareceu apos o Gravar mas nao consegui ler o numero automaticamente (linha ${numeroLinha}).`
+        );
+      }
+    } else {
+      await Promise.all([
+        frame.waitForLoadState("networkidle").catch(() => {}),
+        frame.locator(ACOES.botaoGravarFinal).click(),
+      ]);
+    }
     await frame.waitForTimeout(2000);
   } catch (err) {
     const caminhoPrint = path.join(PASTA_SCREENSHOTS, `erro_gravar_linha_${numeroLinha}.png`);
@@ -413,6 +528,11 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
     .catch(() => "");
   const caminhoTexto = path.join(PASTA_SCREENSHOTS, `nota_real_linha_${numeroLinha}.txt`);
   writeFileSync(caminhoTexto, textoPagina);
+
+  // Se o numero ja veio do recibo (ver contextoRecibo acima), nao ha o que
+  // procurar mais -- o "Fechar" ja fechou aquele modal, entao #lblNumNota
+  // nem existe mais na tela.
+  if (numeroNotaConhecido) return numeroNotaConhecido;
 
   try {
     await frame.waitForSelector(ACOES.numeroNotaGerada, { timeout: 20000 });

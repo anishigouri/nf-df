@@ -64,7 +64,12 @@ export async function processarLote(
       await sleep(config.DF_DELAY_MS);
     }
   } finally {
-    await browser.close();
+    // Em modo debug (DF_DEBUG_CDP_PORT setado, ver config.js) deixa o
+    // navegador aberto depois do lote pra dar tempo de inspecionar o DOM
+    // via CDP -- fechar aqui destruiria a sessao antes de conseguir olhar.
+    if (!config.DF_DEBUG_CDP_PORT) {
+      await browser.close();
+    }
   }
 
   onEvento({ tipo: "concluido" });
