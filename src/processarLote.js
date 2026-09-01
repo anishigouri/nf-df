@@ -13,10 +13,14 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * estabelecimento e emite (ou simula, em dryRun) cada nota em sequencia.
  *
  * @param {string} caminhoPlanilha
- * @param {{ limite?: number, dryRun?: boolean, credenciais: { login: string, senha: string } }} opcoes
+ * @param {{ limite?: number, dryRun?: boolean, dataCompetencia?: string, credenciais: { login: string, senha: string } }} opcoes
  * @param {(evento: object) => void} onEvento chamado a cada passo do processo
  */
-export async function processarLote(caminhoPlanilha, { limite, dryRun = false, credenciais } = {}, onEvento = () => {}) {
+export async function processarLote(
+  caminhoPlanilha,
+  { limite, dryRun = false, dataCompetencia = null, credenciais } = {},
+  onEvento = () => {}
+) {
   let notas = await carregarNotasPendentes(caminhoPlanilha);
   if (limite) notas = notas.slice(0, limite);
 
@@ -44,7 +48,7 @@ export async function processarLote(caminhoPlanilha, { limite, dryRun = false, c
       onEvento({ tipo: "linha_inicio", indice: i + 1, total: notas.length, numeroLinha: nota.numeroLinha, cliente });
 
       try {
-        const resultado = await emitirNota(page, nota.dados, nota.numeroLinha, { dryRun });
+        const resultado = await emitirNota(page, nota.dados, nota.numeroLinha, { dryRun, dataCompetencia });
         if (!dryRun) {
           await marcarResultado(caminhoPlanilha, nota.numeroLinha, { numeroNfse: resultado });
         }

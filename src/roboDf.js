@@ -11,7 +11,7 @@ import path from "node:path";
 import { chromium } from "playwright";
 
 import * as config from "./config.js";
-import { ACOES, EMPRESAS, FORMULARIO_NOTA, LOGIN, MENU, POPUP_CADASTRO, VALORES_FIXOS } from "./seletores.js";
+import { ACOES, EMPRESAS, FORMULARIO_NOTA, LOGIN, MENU, MODAL_ATENCAO, POPUP_CADASTRO, VALORES_FIXOS } from "./seletores.js";
 
 const PASTA_SCREENSHOTS = "screenshots";
 mkdirSync(PASTA_SCREENSHOTS, { recursive: true });
@@ -151,6 +151,62 @@ export async function abrirFormularioNovaNota(page) {
   return frame;
 }
 
+// Overlay de carregamento generico -- varios sites ASP.NET usam um destes
+// padroes pra bloquear a tela durante um postback. E so um "melhor esforco":
+// se nenhum desses seletores existir na pagina, ou o overlay sumir rapido
+// demais pra pegar o "visible", segue sem travar o fluxo (o networkidle e o
+// timeout extra em selecionarEEsperar cobrem esse caso).
+async function esperarCarregamentoSumir(frame, timeoutMs = 10000) {
+  const seletorOverlay =
+    ".loading, .overlay-loading, .load-overlay, .blockUI, .blockOverlay, [id*='UpdateProgress'], #divCarregando, .modal-loading";
+  const overlay = frame.locator(seletorOverlay).first();
+  const apareceu = await overlay
+    .waitFor({ state: "visible", timeout: 800 })
+    .then(() => true)
+    .catch(() => false);
+  if (apareceu) {
+    await overlay.waitFor({ state: "hidden", timeout: timeoutMs }).catch(() => {});
+  }
+}
+
+// Alguns combos da cascata disparam um postback maior (usuario confirmou por
+// screenshot em 01/09/2026 que os campos de retencao tambem carregam a tela)
+// -- esperaExtraMs deixa dar uma folga maior pra esses casos especificos em
+// vez de um timeout fixo curto pra todos.
+async function selecionarEEsperar(frame, seletor, valor, esperaExtraMs = 800) {
+  await frame.selectOption(seletor, valor);
+  await frame.waitForLoadState("networkidle").catch(() => {});
+  await esperarCarregamentoSumir(frame);
+  await frame.waitForTimeout(esperaExtraMs);
+}
+
+// So para diagnostico: le o valor atualmente selecionado nos campos da
+// cascata de tributacao. Usado pra descobrir em que ponto exato do fluxo
+// esses campos "somem" -- confirmado por screenshot em 01/09/2026 que
+// Tributacao do ISSQN, Regime Especial, Tipo de Retencao do ISSQN e Tipo de
+// Retencao do PIS/COFINS/CSLL ficam vazios no Gravar mesmo apos serem
+// selecionados explicitamente aqui, enquanto Situacao Tributaria do
+// PIS/COFINS (selecionado no meio dessa mesma cascata) fica correto -- ou
+// seja, a selecao em si funciona, mas algo DEPOIS reverte alguns campos.
+async function lerCascataTributacao(frame) {
+  const campos = ["ddlTribISSQN", "ddlTipoRetencaoISSQN", "ddlRegimeEspecial", "ddlSitTribFederal", "ddlTipoRetencaoPisCofinsCsll"];
+  const valores = {};
+  for (const campo of campos) {
+    valores[campo] = await frame
+      .locator(FORMULARIO_NOTA[campo])
+      .inputValue()
+      .catch(() => "(erro ao ler)");
+  }
+  return valores;
+}
+
+// Converte "AAAA-MM-DD" (formato do <input type="date"> do front-end) para
+// "DD/MM/AAAA" (formato usado nos campos de data do site da DF).
+function formatarDataBr(dataIso) {
+  const [ano, mes, dia] = dataIso.split("-");
+  return `${dia}/${mes}/${ano}`;
+}
+
 // Traduz os nomes de coluna da planilha para os campos do formulario.
 function mapearDadosDaPlanilha(linha) {
   return {
@@ -164,34 +220,77 @@ function mapearDadosDaPlanilha(linha) {
  * Preenche o formulario da nota no iframe. Retorna sem gravar -- quem chama
  * decide se confirma a gravacao (ver emitirNota).
  */
-async function preencherFormulario(frame, linha) {
+async function preencherFormulario(frame, linha, dataCompetencia) {
   const dados = mapearDadosDaPlanilha(linha);
 
   if (!dados.cnpjCliente) throw new ErroEmissaoNota("Linha sem CNPJ CLIENTE preenchido.");
   if (!dados.descricaoServico) throw new ErroEmissaoNota("Linha sem DESCRIÇÃO preenchida.");
   if (!dados.valorServico) throw new ErroEmissaoNota("Linha sem VALOR CONTABIL preenchido.");
 
-  // cascata de selects -- cada um so populatriz as opcoes depois que o anterior e escolhido
-  await frame.selectOption(FORMULARIO_NOTA.ddlAtivMunicipal, VALORES_FIXOS.atividadeMunicipal);
-  await frame.waitForTimeout(1200);
-  await frame.selectOption(FORMULARIO_NOTA.ddlTrbNacional, VALORES_FIXOS.tributacaoNacional);
-  await frame.waitForTimeout(1200);
-  await frame.selectOption(FORMULARIO_NOTA.ddlNBS, VALORES_FIXOS.nbs);
-  await frame.waitForTimeout(1200);
-  await frame.selectOption(FORMULARIO_NOTA.ddlTribISSQN, VALORES_FIXOS.tribISSQN);
-  await frame.waitForTimeout(1500);
-  await frame.selectOption(FORMULARIO_NOTA.ddlRegimeEspecial, VALORES_FIXOS.regimeEspecial);
-  await frame.waitForTimeout(500);
-  await frame.selectOption(FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
-  await frame.waitForTimeout(500);
-
+  // Descricao e Valor Total dos Servicos precisam vir ANTES da cascata de
+  // tributacao -- Valor Total dos Servicos e a propria Base de Calculo do
+  // ISSQN (confirmado por screenshot em 01/09/2026: os dois campos mostram
+  // sempre o mesmo numero), entao o calculo/validacao da secao ISSQN
+  // (Tributacao do ISSQN, Regime Especial, Tipo de Retencao do ISSQN)
+  // depende desse valor ja estar preenchido. Preenchendo so no final (como
+  // era antes), o modal "Atencao" volta a pedir esses campos de tributacao
+  // mesmo apos serem selecionados. O Tab depois do valor garante o blur/
+  // "change" real (fill() sozinho so dispara "input"), igual ja fizemos com
+  // a Data de Competencia.
   await frame.fill(FORMULARIO_NOTA.descricaoServico, dados.descricaoServico);
   await frame.fill(FORMULARIO_NOTA.valorServico, String(dados.valorServico));
+  await frame.locator(FORMULARIO_NOTA.valorServico).press("Tab");
+  await frame.waitForLoadState("networkidle").catch(() => {});
+  await frame.waitForTimeout(500);
+
+  // cascata de selects -- cada um so populariza as opcoes (ou registra a
+  // escolha no servidor via postback/AJAX) depois que o anterior e
+  // escolhido. Espera a rede ficar parada de verdade em vez de um tempo
+  // fixo, porque um delay fixo curto demais faz o site achar que o campo
+  // ficou vazio (confirmado: modal "Atencao" pedindo pra preencher Tributacao
+  // do ISSQN/Regime Especial/PIS-COFINS-CSLL mesmo com o valor selecionado).
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlAtivMunicipal, VALORES_FIXOS.atividadeMunicipal);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTrbNacional, VALORES_FIXOS.tributacaoNacional);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlNBS, VALORES_FIXOS.nbs);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTribISSQN, VALORES_FIXOS.tribISSQN);
+  // Regime Especial precisa vir ANTES de Tipo de Retencao do ISSQN -- essa e
+  // a ordem real do formulario (confirmada pelo HTML que o usuario mandou em
+  // 01/09/2026: Regime Especial aparece antes de Tipo de Retencao do ISSQN
+  // na pagina). Selecionar na ordem trocada faz o site nunca popular a opcao
+  // "1" em #ddlTipoRetencao, e frame.selectOption trava em timeout
+  // ("did not find some options") esperando por uma opcao que nunca aparece.
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlRegimeEspecial, VALORES_FIXOS.regimeEspecial);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoISSQN, VALORES_FIXOS.tipoRetencaoISSQN, 3000);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
+  await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
+
+  // DIAGNOSTICO: retrato dos campos da cascata logo apos serem selecionados,
+  // antes de qualquer outro campo (data/descricao/valor/cnpj) ser tocado.
+  console.log("[diagnostico] cascata apos selects:", await lerCascataTributacao(frame));
+
+  if (dataCompetencia) {
+    // o campo tambem tem onchange disparando __doPostBack (igual aos combos
+    // da cascata) -- fill() sozinho so dispara "input", entao o Tab garante
+    // que o blur/"change" real aconteça e o site registre a competencia
+    // informada antes do Gravar.
+    await frame.fill(FORMULARIO_NOTA.dataCompetencia, formatarDataBr(dataCompetencia));
+    await frame.locator(FORMULARIO_NOTA.dataCompetencia).press("Tab");
+    await frame.waitForLoadState("networkidle").catch(() => {});
+    await frame.waitForTimeout(500);
+  }
+
+  // DIAGNOSTICO: retrato apos a Data de Competencia -- se algum campo mudar
+  // aqui em relacao ao retrato anterior, o culpado e o postback da data.
+  console.log("[diagnostico] cascata apos data competencia:", await lerCascataTributacao(frame));
 
   // CNPJ do tomador -- ao sair do campo, o site auto-preenche razao social e endereco
   await frame.fill(FORMULARIO_NOTA.cnpjCliente, dados.cnpjCliente);
   await frame.locator(FORMULARIO_NOTA.cnpjCliente).press("Tab");
   await frame.waitForTimeout(2000);
+
+  // DIAGNOSTICO: retrato final -- se algum campo so muda aqui (e nao no
+  // retrato anterior), o culpado e o postback do CNPJ do tomador.
+  console.log("[diagnostico] cascata apos CNPJ tomador:", await lerCascataTributacao(frame));
 
   const razaoSocialTomador = await frame.locator("#txtRazaoSocialTom").inputValue();
   if (!razaoSocialTomador) {
@@ -207,9 +306,9 @@ async function preencherFormulario(frame, linha) {
  * Em modo dryRun, preenche tudo mas NAO clica em Gravar -- tira um
  * screenshot pra revisar antes de rodar em producao de verdade.
  */
-export async function emitirNota(page, linha, numeroLinha, { dryRun = false } = {}) {
+export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dataCompetencia = null } = {}) {
   const frame = await abrirFormularioNovaNota(page);
-  await preencherFormulario(frame, linha);
+  await preencherFormulario(frame, linha, dataCompetencia);
 
   if (dryRun) {
     const caminhoPrint = path.join(PASTA_SCREENSHOTS, `dry_run_linha_${numeroLinha}.png`);
@@ -226,6 +325,28 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false } = 
     await frame.locator(ACOES.botaoGravar).click();
     await frame.waitForTimeout(1500);
 
+    // O site pode recusar o Gravar com um modal "Atencao" listando campos
+    // obrigatorios nao preenchidos (confirmado por screenshot em 01/09/2026
+    // -- aparenta ficar na pagina principal, cobrindo ate o menu lateral, e
+    // NAO no modal de assinatura esperado abaixo). Se esse modal ficasse
+    // aberto sem ser fechado, a proxima nota do lote falhava tentando abrir
+    // o formulario de novo ("Nao encontrei o iframe da Nova Nota
+    // Eletronica"), porque o clique no menu nao "passava" por baixo dele --
+    // por isso detecta e fecha (clica OK) aqui antes de seguir ou abortar.
+    const modalAtencao = page.locator(MODAL_ATENCAO.seletor);
+    const modalAtencaoApareceu = await modalAtencao
+      .first()
+      .waitFor({ state: "visible", timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (modalAtencaoApareceu) {
+      const mensagem = await modalAtencao.first().innerText().catch(() => "(nao consegui ler o texto do modal)");
+      await page.locator(MODAL_ATENCAO.botaoOk).first().click().catch(() => {});
+      throw new ErroEmissaoNota(
+        `Site recusou Gravar por campo(s) obrigatorio(s) nao preenchido(s) (linha ${numeroLinha}): ${mensagem.trim()}`
+      );
+    }
+
     // modal perguntando se quer assinar com certificado digital -- escolher "Nao"
     await frame.locator(ACOES.modalAssinatura_botaoNao).first().click();
     await frame.waitForTimeout(1000);
@@ -238,6 +359,9 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false } = 
   } catch (err) {
     const caminhoPrint = path.join(PASTA_SCREENSHOTS, `erro_gravar_linha_${numeroLinha}.png`);
     await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    if (err instanceof ErroEmissaoNota) {
+      throw new ErroEmissaoNota(`${err.message} Screenshot do estado real salvo em ${caminhoPrint}.`);
+    }
     throw new ErroEmissaoNota(
       `Falha ao clicar em Gravar/confirmar assinatura (linha ${numeroLinha}): ${err.message}. ` +
         `Screenshot do estado real salvo em ${caminhoPrint}.`

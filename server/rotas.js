@@ -38,11 +38,11 @@ rotas.get("/jobs/:jobId", (req, res) => {
 });
 
 rotas.post("/jobs/:jobId/iniciar", express.json(), (req, res) => {
-  const { limite = null, dryRun = false, login, senha } = req.body ?? {};
+  const { limite = null, dryRun = false, dataCompetencia = null, login, senha } = req.body ?? {};
   if (!login || !senha) return res.status(400).json({ erro: "Login e senha sao obrigatorios." });
 
   try {
-    const job = iniciarJob(req.params.jobId, { limite, dryRun, credenciais: { login, senha } });
+    const job = iniciarJob(req.params.jobId, { limite, dryRun, dataCompetencia, credenciais: { login, senha } });
     res.status(202).json(snapshotJob(job));
   } catch (err) {
     if (err instanceof JobJaRodandoError) return res.status(409).json({ erro: err.message });

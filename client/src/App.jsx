@@ -73,6 +73,14 @@ const IconeSair = (props) => (
   </Icone>
 );
 
+function dataDeHojeIso() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+  const dia = String(hoje.getDate()).padStart(2, "0");
+  return `${ano}-${mes}-${dia}`;
+}
+
 function lerCredenciaisSalvas() {
   try {
     const bruto = sessionStorage.getItem(CHAVE_SESSAO);
@@ -105,6 +113,7 @@ export default function App() {
   const [job, setJob] = useState(null); // { id, totalPendentes }
   const [dryRun, setDryRun] = useState(true);
   const [limite, setLimite] = useState("");
+  const [dataCompetencia, setDataCompetencia] = useState(dataDeHojeIso);
   const [totalRodada, setTotalRodada] = useState(0);
   const [statusJob, setStatusJob] = useState("aguardando");
   const [mensagemFase, setMensagemFase] = useState("");
@@ -216,6 +225,10 @@ export default function App() {
 
   async function iniciarProcessamento() {
     setErro(null);
+    if (!dataCompetencia) {
+      setErro("Informe a data da competência.");
+      return;
+    }
     const calculado = limite ? Math.min(job.totalPendentes, Number(limite)) : job.totalPendentes;
     setTotalRodada(calculado);
     try {
@@ -225,6 +238,7 @@ export default function App() {
         body: JSON.stringify({
           limite: limite ? Number(limite) : null,
           dryRun,
+          dataCompetencia,
           login: credenciais.login,
           senha: credenciais.senha,
         }),
@@ -243,6 +257,7 @@ export default function App() {
     setJob(null);
     setDryRun(true);
     setLimite("");
+    setDataCompetencia(dataDeHojeIso());
     setTotalRodada(0);
     setStatusJob("aguardando");
     setMensagemFase("");
@@ -367,6 +382,16 @@ export default function App() {
                     placeholder="todas"
                     value={limite}
                     onChange={(e) => setLimite(e.target.value)}
+                  />
+                </div>
+
+                <div className="campo">
+                  <label htmlFor="dataCompetencia">Data da competência</label>
+                  <input
+                    id="dataCompetencia"
+                    type="date"
+                    value={dataCompetencia}
+                    onChange={(e) => setDataCompetencia(e.target.value)}
                   />
                 </div>
 
