@@ -1,0 +1,17 @@
+{
+  "name": "nf-df",
+  "version": "1.0.0",
+  "description": "Robo de lancamento de NFS-e no ISS Online DF (iss.fazenda.df.gov.br)",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "postinstall": "playwright install chromium",
+    "start": "node src/main.js",
+    "dry-run": "node src/main.js --dry-run --limite 2"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "playwright": "^1.47.0"
+  }
+}
