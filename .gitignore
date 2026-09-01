@@ -2,3 +2,5 @@
 node_modules/
 downloads/
 screenshots/
+uploads/
+client/dist/

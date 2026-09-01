@@ -59,11 +59,15 @@ export const ACOES = {
   // o botao visivel "Gravar" tem id btnAssinar e abre um modal perguntando se
   // quer assinar com certificado digital
   botaoGravar: "#btnAssinar",
-  // TODO: confirmar em um dry-run real qual e o seletor exato do botao/link
-  // "Nao" desse modal de assinatura -- ainda nao testado (ver README)
-  modalAssinatura_botaoNao: "#TODO_modal_assinatura_nao",
+  // Ainda nao confirmado num Gravar real -- melhor palpite, no mesmo padrao
+  // que ja funciona pro popup de cadastro (POPUP_CADASTRO.botaoCancelar).
+  // Se nao bater, emitirNota() em roboDf.js aborta ANTES de gravar de
+  // verdade e tira screenshot do modal real pra corrigir aqui.
+  modalAssinatura_botaoNao: "text=Não",
   // apos escolher "Nao" no modal, este e o botao que efetivamente grava a nota
   botaoGravarFinal: "#btnGravarAssinado",
-  // TODO: confirmar onde aparece o numero da nota gerada apos o gravar ter sucesso
+  // Ainda sem seletor confirmado -- emitirNota() sempre tira screenshot e
+  // salva o texto da pagina depois de gravar de verdade, entao mesmo sem
+  // bater aqui a evidencia fica salva pra confirmar o numero manualmente.
   numeroNotaGerada: "#TODO_numero_nota_gerada",
 };

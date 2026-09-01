@@ -25,15 +25,34 @@ exatamente o que o usuário faz manualmente com login e senha.
 
 ## Stack
 
-- Node.js (ESM) + Playwright (controle do navegador) + ExcelJS (planilha).
-- Projeto em `c:\Users\allan\OneDrive\Documentos\Desenvolvimento\Projetos\nf-df`.
+- Backend: Node.js (ESM) + Playwright (controle do navegador) + ExcelJS
+  (planilha) + Express (API REST + upload + Server-Sent Events).
+- Frontend: React + Vite, tema dark, tela de login própria.
+- Projeto em `c:\Users\allan.nishigouri_koi\Documents\Desenvolvimento\nf-df`.
+
+## Fluxo único (sem CLI)
+
+O projeto já teve uma CLI (`node src/main.js`) além do front-end web, mas
+ela foi **removida em 01/09/2026 a pedido do usuário** pra não manter dois
+caminhos fazendo a mesma coisa. Hoje existe só um fluxo, tudo pelo
+navegador:
+
+1. Abrir o front-end (`npm start` na raiz + `npm run dev` em `client/`, ou
+   só `npm start` depois de `npm run build` em `client/`).
+2. Tela de login: usuário digita o login e a senha do próprio ISS Online DF
+   (não é uma conta separada do app). Fica só em `sessionStorage` do
+   navegador — nunca em disco, nunca em `.env`. Enviado pro backend só no
+   momento de iniciar um processamento.
+3. Upload da planilha `.xlsx`.
+4. Configurar `dry-run`/limite e iniciar — acompanhamento linha a linha em
+   tempo real via SSE, com download da planilha atualizada ao final.
+
+Se o login for recusado pelo site, o backend identifica isso (classe
+`CredenciaisInvalidasError` em [src/roboDf.js](src/roboDf.js)) e o
+front-end derruba a sessão automaticamente, voltando pra tela de login com
+o erro.
 
 ## O que já funciona (testado de ponta a ponta contra o site real)
-
-Rodei `node src/main.js --limite 1 --dry-run` com uma linha real da planilha
-de exemplo e o formulário foi preenchido **corretamente, confirmado por
-screenshot** (`screenshots/dry_run_linha_2.png`, gerado nessa sessão — pode
-já ter sido apagado, é só rodar de novo pra gerar outro).
 
 Descobertas técnicas importantes (documentadas em código, mas resumindo
 aqui porque foram trabalhosas de descobrir):
@@ -93,14 +112,19 @@ aqui porque foram trabalhosas de descobrir):
    - **A coluna `NOTA` (coluna F) da própria planilha é usada como
      controle**: linha com `NOTA` vazia = pendente; o robô escreve o
      número da nota emitida ali mesmo, exatamente como o processo manual
-     do usuário já funciona. Não criei colunas de status extras.
+     do usuário já funciona.
 
-## O que falta (bloqueado por decisão do usuário — ver abaixo)
+4. **Front-end React completo**: tela de login, upload por drag-and-drop,
+   configuração (dry-run/limite), progresso em tempo real via SSE (stepper,
+   barra de progresso, stat cards, lista de linhas animada) e download da
+   planilha atualizada. Tema dark com Space Grotesk/Inter/JetBrains Mono.
+
+## O que falta (bloqueado por decisão do usuário)
 
 Só falta descobrir **2 coisas**, que só aparecem depois de clicar de
 verdade no botão "Gravar" (que no HTML tem id `#btnAssinar`) — e clicar
 nele de verdade **emite uma nota fiscal real**, com consequência
-tributária/legal. Por isso eu **não testei sozinho** essa parte:
+tributária/legal. Por isso ainda não foi testado:
 
 1. **Seletor do botão/link "Não"** no modal que pergunta se o usuário quer
    assinar a nota com certificado digital (o usuário descreveu esse passo
@@ -116,54 +140,51 @@ tributária/legal. Por isso eu **não testei sozinho** essa parte:
    `NOTA`. Marcado como `#TODO_numero_nota_gerada` em
    [src/seletores.js](src/seletores.js).
 
-**Decisão do usuário (31/08/2026): parar por aqui hoje.** Amanhã, em nova
-sessão de chat, decidir entre:
+Opções pra resolver (mesmas de antes, sem novidade):
 
-- (a) o usuário clicar em "Gravar" manualmente uma vez, observar o modal de
-  certificado e onde sai o número da nota, e descrever/mostrar print pra eu
-  completar o código; ou
+- (a) o usuário clicar em "Gravar" manualmente uma vez no site, observar o
+  modal de certificado e onde sai o número da nota, e descrever/mostrar
+  print pra completar o código; ou
 - (b) autorizar explicitamente o robô a emitir 1 nota real de teste (linha
-  real da planilha, consequência fiscal real, sem desfazer); ou
-- (c) seguir para o front-end React primeiro e resolver isso depois.
-
-## Também pendente (não iniciado)
-
-- **Front-end em React** pedido pelo usuário: upload da planilha pela
-  interface, e acompanhamento do progresso linha a linha enquanto o robô
-  processa. Não existe nenhum código disso ainda — hoje o projeto só tem a
-  CLI (`node src/main.js`). Vai precisar de um backend (Node/Express
-  provavelmente) que rode o Playwright e transmita progresso pro front
-  (SSE ou WebSocket), já que o Playwright não roda no navegador do usuário.
+  real da planilha, consequência fiscal real, sem desfazer), rodando com
+  `DF_HEADLESS=false` pra acompanhar.
 
 ## Estrutura atual do projeto
 
 ```
 nf-df/
-  .env                  # credenciais reais (DF_LOGIN, DF_SENHA, DF_CNPJ_ESTABELECIMENTO) -- gitignored
+  .env                    # DF_CNPJ_ESTABELECIMENTO, DF_HEADLESS, DF_DELAY_MS -- gitignored
   .env.example
-  README.md             # instruções de uso
-  PROGRESSO.md           # este arquivo
-  package.json
+  README.md               # instrucoes de uso
+  PROGRESSO.md             # este arquivo
+  package.json             # "postinstall" (chromium) e "start" (sobe o servidor)
   src/
-    config.js           # le variaveis de ambiente
-    planilha.js          # leitura/escrita da planilha via coluna NOTA
-    roboDf.js            # toda a automacao Playwright (login, navegacao, preenchimento)
-    seletores.js         # todos os seletores CSS/ids do site + valores fixos
-    main.js              # CLI: node src/main.js [--planilha x.xlsx] [--limite N] [--dry-run]
+    config.js             # le variaveis de ambiente
+    planilha.js            # leitura/escrita da planilha via coluna NOTA
+    roboDf.js              # toda a automacao Playwright (login, navegacao, preenchimento)
+    seletores.js           # todos os seletores CSS/ids do site + valores fixos
+    processarLote.js       # login -> seleciona estabelecimento -> loop de emissao, com callback de progresso
+  server/
+    index.js               # app Express, serve a API e o build do front em producao
+    rotas.js                # /api/upload, /api/jobs/:id, /api/jobs/:id/iniciar, /eventos (SSE), /planilha
+    gerenciadorJobs.js      # estado em memoria dos jobs (um por vez)
+  client/                  # front-end React (Vite)
+    src/App.jsx             # fluxo completo: login -> upload -> configurar -> progresso
+    src/TelaLogin.jsx       # tela de login (login/senha do ISS Online DF)
+    src/index.css           # tema dark
   planilhas/
-    notas.xlsx           # planilha de exemplo com 1 linha real de teste (dry-run)
-  screenshots/            # gerado em runtime (dry-run e erros)
+    notas.xlsx              # planilha de exemplo com 1 linha real de teste (dry-run)
+  uploads/                  # planilhas enviadas pelo front-end -- gerado em runtime, gitignored
+  screenshots/              # gerado em runtime (dry-run e erros)
 ```
 
-## Como retomar amanhã
+## Como retomar
 
-1. Rodar de novo o dry-run pra confirmar que o site não mudou:
-   ```bash
-   node src/main.js --limite 1 --dry-run
-   ```
-   Conferir o screenshot gerado em `screenshots/`.
-2. Resolver os 2 TODOs de `seletores.js` (ver seção acima) com uma das 3
-   opções (a, b ou c).
-3. Depois disso, o `node src/main.js` (sem `--dry-run`) já deve estar
-   pronto pra lançar notas de verdade em lote.
-4. Só então partir para o front-end React.
+1. `npm install` na raiz e `cd client && npm install`.
+2. Rodar `npm start` (raiz) e `npm run dev` (`client/`), abrir
+   `http://localhost:5173`, logar e rodar um dry-run pra confirmar que o
+   site não mudou. Conferir o screenshot gerado em `screenshots/`.
+3. Resolver os 2 TODOs de `seletores.js` (ver seção "O que falta" acima)
+   com a opção (a) ou (b).
+4. Depois disso, o fluxo web (sem `dry-run`) já deve estar pronto pra
+   lançar notas de verdade em lote.
