@@ -227,16 +227,35 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
   if (!dados.descricaoServico) throw new ErroEmissaoNota("Linha sem DESCRIÇÃO preenchida.");
   if (!dados.valorServico) throw new ErroEmissaoNota("Linha sem VALOR CONTABIL preenchido.");
 
-  // Descricao e Valor Total dos Servicos precisam vir ANTES da cascata de
-  // tributacao -- Valor Total dos Servicos e a propria Base de Calculo do
-  // ISSQN (confirmado por screenshot em 01/09/2026: os dois campos mostram
-  // sempre o mesmo numero), entao o calculo/validacao da secao ISSQN
-  // (Tributacao do ISSQN, Regime Especial, Tipo de Retencao do ISSQN)
-  // depende desse valor ja estar preenchido. Preenchendo so no final (como
-  // era antes), o modal "Atencao" volta a pedir esses campos de tributacao
-  // mesmo apos serem selecionados. O Tab depois do valor garante o blur/
-  // "change" real (fill() sozinho so dispara "input"), igual ja fizemos com
-  // a Data de Competencia.
+  // CNPJ do tomador precisa vir ANTES da cascata de tributacao -- confirmado
+  // por diagnostico em 01/09/2026 (console.log comparando o valor selecionado
+  // em cada campo da cascata em varios pontos do fluxo): preenchendo o CNPJ
+  // do tomador por ultimo (como era antes), o postback que auto-preenche
+  // razao social/endereco do tomador reseta Tributacao do ISSQN, Regime
+  // Especial e Tipo de Retencao do ISSQN de volta para vazio -- Situacao
+  // Tributaria e Tipo de Retencao do PIS/COFINS nao sao afetados, entao
+  // parece que so a secao ISSQN depende do municipio/UF do tomador. Bate
+  // tambem com a ordem real da pagina: "Dados do Tomador de Servico" fica
+  // ANTES de "Identificacao dos Servicos".
+  await frame.fill(FORMULARIO_NOTA.cnpjCliente, dados.cnpjCliente);
+  await frame.locator(FORMULARIO_NOTA.cnpjCliente).press("Tab");
+  await frame.waitForLoadState("networkidle").catch(() => {});
+  await frame.waitForTimeout(2000);
+
+  const razaoSocialTomador = await frame.locator("#txtRazaoSocialTom").inputValue();
+  if (!razaoSocialTomador) {
+    throw new ErroEmissaoNota(
+      `CNPJ do cliente (${dados.cnpjCliente}) nao foi reconhecido pelo site (razao social nao preencheu).`
+    );
+  }
+
+  // Descricao e Valor Total dos Servicos tambem precisam vir ANTES da
+  // cascata de tributacao -- Valor Total dos Servicos e a propria Base de
+  // Calculo do ISSQN (confirmado por screenshot em 01/09/2026: os dois
+  // campos mostram sempre o mesmo numero), entao o calculo/validacao da
+  // secao ISSQN depende desse valor ja estar preenchido. O Tab depois do
+  // valor garante o blur/"change" real (fill() sozinho so dispara "input"),
+  // igual ja fizemos com a Data de Competencia.
   await frame.fill(FORMULARIO_NOTA.descricaoServico, dados.descricaoServico);
   await frame.fill(FORMULARIO_NOTA.valorServico, String(dados.valorServico));
   await frame.locator(FORMULARIO_NOTA.valorServico).press("Tab");
@@ -264,10 +283,6 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
   await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
   await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
 
-  // DIAGNOSTICO: retrato dos campos da cascata logo apos serem selecionados,
-  // antes de qualquer outro campo (data/descricao/valor/cnpj) ser tocado.
-  console.log("[diagnostico] cascata apos selects:", await lerCascataTributacao(frame));
-
   if (dataCompetencia) {
     // o campo tambem tem onchange disparando __doPostBack (igual aos combos
     // da cascata) -- fill() sozinho so dispara "input", entao o Tab garante
@@ -279,24 +294,25 @@ async function preencherFormulario(frame, linha, dataCompetencia) {
     await frame.waitForTimeout(500);
   }
 
-  // DIAGNOSTICO: retrato apos a Data de Competencia -- se algum campo mudar
-  // aqui em relacao ao retrato anterior, o culpado e o postback da data.
-  console.log("[diagnostico] cascata apos data competencia:", await lerCascataTributacao(frame));
-
-  // CNPJ do tomador -- ao sair do campo, o site auto-preenche razao social e endereco
-  await frame.fill(FORMULARIO_NOTA.cnpjCliente, dados.cnpjCliente);
-  await frame.locator(FORMULARIO_NOTA.cnpjCliente).press("Tab");
-  await frame.waitForTimeout(2000);
-
-  // DIAGNOSTICO: retrato final -- se algum campo so muda aqui (e nao no
-  // retrato anterior), o culpado e o postback do CNPJ do tomador.
-  console.log("[diagnostico] cascata apos CNPJ tomador:", await lerCascataTributacao(frame));
-
-  const razaoSocialTomador = await frame.locator("#txtRazaoSocialTom").inputValue();
-  if (!razaoSocialTomador) {
-    throw new ErroEmissaoNota(
-      `CNPJ do cliente (${dados.cnpjCliente}) nao foi reconhecido pelo site (razao social nao preencheu).`
-    );
+  // Checagem final de seguranca: confirma que a cascata de tributacao ainda
+  // esta com os valores esperados depois de todo o resto do formulario ser
+  // preenchido. Falha aqui, com uma mensagem clara apontando o(s) campo(s)
+  // exato(s), em vez de deixar o fluxo seguir pro Gravar e esbarrar no modal
+  // generico "Atencao" do proprio site.
+  const valoresFinais = await lerCascataTributacao(frame);
+  const esperados = {
+    ddlTribISSQN: VALORES_FIXOS.tribISSQN,
+    ddlTipoRetencaoISSQN: VALORES_FIXOS.tipoRetencaoISSQN,
+    ddlRegimeEspecial: VALORES_FIXOS.regimeEspecial,
+    ddlSitTribFederal: VALORES_FIXOS.situacaoTributariaPisCofins,
+    ddlTipoRetencaoPisCofinsCsll: VALORES_FIXOS.tipoRetencaoPisCofinsCsll,
+  };
+  const divergentes = Object.entries(esperados).filter(([campo, valorEsperado]) => valoresFinais[campo] !== valorEsperado);
+  if (divergentes.length > 0) {
+    const detalhe = divergentes
+      .map(([campo, valorEsperado]) => `${campo} (esperado "${valorEsperado}", encontrado "${valoresFinais[campo]}")`)
+      .join(", ");
+    throw new ErroEmissaoNota(`Campo(s) da cascata de tributacao vazios/incorretos apos preencher o formulario: ${detalhe}.`);
   }
 }
 
