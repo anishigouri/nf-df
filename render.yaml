@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter # Free nao tem RAM suficiente pra rodar Node + Chromium headless com folga
+    plan: free # 512MB RAM / hiberna apos 15min sem trafego -- pode nao aguentar um lote longo (ver README, secao 4)
     numInstances: 1 # obrigatorio: o job fica em memoria de um unico processo (ver server/gerenciadorJobs.js)
     healthCheckPath: /
     envVars:

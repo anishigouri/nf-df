@@ -112,9 +112,13 @@ Passos:
 3. **Não defina `DF_DEBUG_CDP_PORT` em produção** (ver comentário em
    [src/config.js](src/config.js) — esse endpoint permite qualquer processo
    local controlar o navegador).
-4. Plano: use pelo menos o **Starter** (não o Free) — Chromium headless
-   precisa de RAM confortável e o Free hiberna por inatividade, o que pode
-   derrubar um lote no meio do processamento.
+4. Plano: `render.yaml` está configurado com **Free** (sem custo, sem
+   cartão de crédito). Funciona para testar, mas tem só 512MB de RAM e
+   hiberna após 15min sem tráfego — o que pode derrubar um lote longo no
+   meio do processamento. Pra uso de verdade (emitir notas em volume),
+   troque pra **Starter** (US$7/mês, mais RAM e sem hibernação) direto no
+   dashboard do serviço (Settings → Instance Type) ou mudando `plan: free`
+   para `plan: starter` no `render.yaml`.
 5. **Só uma instância** (`numInstances: 1`, já no `render.yaml`) — o estado
    dos jobs fica em memória de um único processo
    ([server/gerenciadorJobs.js](server/gerenciadorJobs.js)), então não dá pra
