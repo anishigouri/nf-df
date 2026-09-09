@@ -1,0 +1,245 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e8]:
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Governo do Distrito Federal Secretaria de Estado de Economia do Distrito Federal" [ref=e11] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e12]: Governo do Distrito Federal
+            - generic [ref=e13]: Secretaria de Estado de Economia do Distrito Federal
+      - list [ref=e14]:
+        - listitem
+        - listitem [ref=e15]:
+          - generic [ref=e16]: "Status: Ativo"
+        - listitem [ref=e17]:
+          - 'button " Competência: Agosto 2026" [ref=e18] [cursor=pointer]':
+            - generic [ref=e19]: 
+            - text: "Competência: Agosto 2026"
+        - listitem [ref=e21]:
+          - button " CLARO S.A." [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: 
+            - text: CLARO S.A.
+          - text: "Insc. Municipal: 0747318102057"
+        - listitem [ref=e25]:
+          - link " CARLOS EDUARDO LIMA ..." [ref=e26] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=e27]: 
+            - text: CARLOS EDUARDO LIMA ...
+          - text: "Acessado em: 09/09/2026 14:43:37"
+        - listitem [ref=e28]:
+          - link " Sair" [ref=e29] [cursor=pointer]:
+            - /url: javascript:__doPostBack('btnSair','')
+  - link " Menu" [ref=e31] [cursor=pointer]:
+    - /url: "#menu-toggle"
+    - generic [ref=e32]: 
+    - text: Menu
+  - generic:
+    - generic [ref=e33]:
+      - generic:
+        - generic [ref=e34]:
+          - link [ref=e35] [cursor=pointer]:
+            - /url: "#"
+            - img "Issnet Online" [ref=e36]
+          - generic [ref=e37]:
+            - textbox "Buscar no Menu IssNet" [ref=e38]
+            - generic [ref=e39]: 
+        - generic:
+          - tabpanel:
+            - generic:
+              - list:
+                - listitem:
+                  - generic [ref=e41]:
+                    - generic [ref=e42] [cursor=pointer]
+                    - generic: DFE - Domicílio Fiscal Eletrônico
+                  - separator
+                - listitem:
+                  - generic [ref=e43]:
+                    - generic [ref=e44] [cursor=pointer]
+                    - generic: Declaração de Serviços Prestados
+                  - separator
+                - listitem:
+                  - generic [ref=e45]:
+                    - generic [ref=e46] [cursor=pointer]
+                    - generic: Declaração de Serviços Contratados
+                  - separator
+                - listitem:
+                  - generic [ref=e47]:
+                    - generic [ref=e48] [cursor=pointer]
+                    - generic: Solicitação de Documentos Fiscais
+                  - separator
+                - listitem:
+                  - generic [ref=e49]:
+                    - generic [ref=e50] [cursor=pointer]
+                    - generic: Guias de Recolhimento
+                  - separator
+                - listitem:
+                  - generic [ref=e51]:
+                    - generic [ref=e52] [cursor=pointer]
+                    - generic: Livro Fiscal
+                  - separator
+                - listitem:
+                  - generic [ref=e53]:
+                    - generic [ref=e54] [cursor=pointer]
+                    - generic: Outras Opções
+                  - separator
+                - listitem:
+                  - generic [ref=e55]:
+                    - link "Extrato":
+                      - /url: ../fechamento/extratoFechamento.aspx
+                  - separator
+                - listitem:
+                  - generic [ref=e56]:
+                    - link "Pendências":
+                      - /url: ../Pendencias/Pendencias.aspx
+                  - separator
+                - listitem:
+                  - generic [ref=e57]:
+                    - generic [ref=e58] [cursor=pointer]
+                    - generic: Nota Eletrônica
+                  - list:
+                    - listitem:
+                      - generic [ref=e59]:
+                        - link "Nova Nota Eletrônica":
+                          - /url: ../NotaDigital/NotaNacional.aspx
+                      - separator
+                    - listitem:
+                      - generic [ref=e60]:
+                        - link "Consultar Nota Eletrônica":
+                          - /url: ../NotaDigital/Consulta_Nota.aspx?D8+BE+7F+46+AC+1B+F2+F5+E+C4+8C+57+F9+DF+9E+71+2A+A3+2E+C8+13+FB+20+79+79+25+CB+C3+63+23+86+C6+66+8F+15+76+9F+FE+4A+76+F5+A7+8+31+6+5B+64+EF+CD+54+DF+A6+E2+9C+76+16+
+                      - separator
+                    - listitem:
+                      - generic [ref=e61]:
+                        - link "Consultar Envio Nacional":
+                          - /url: ../NotaDigital/ConsultaNotaEnvioNacional.aspx
+                      - separator
+                    - listitem:
+                      - generic [ref=e62]:
+                        - link "Consultar Solicitações de Cancelamento":
+                          - /url: ../NotaDigital/consulta_cancelamento.aspx
+                      - separator
+                    - listitem:
+                      - generic [ref=e63]:
+                        - generic [ref=e64] [cursor=pointer]
+                        - generic [ref=e65]: Solicitação de Notas em Lote
+                      - separator
+                  - separator
+                - listitem:
+                  - generic [ref=e66]:
+                    - generic [ref=e67] [cursor=pointer]
+                    - generic: Recusa ISSQN Notas Tomadas
+                  - separator
+                - listitem:
+                  - generic [ref=e68]:
+                    - generic [ref=e69] [cursor=pointer]
+                    - generic: Recurso dos Serv. Prestados
+                  - separator
+                - listitem:
+                  - generic [ref=e70]:
+                    - generic [ref=e71] [cursor=pointer]
+                    - generic: Ajuda
+                  - separator
+        - tablist:
+          - tab " Menu Completo" [ref=e72]:
+            - generic [ref=e73]: 
+            - text: Menu Completo
+    - iframe [active] [ref=e78]:
+      - generic [ref=f1e2]:
+        - generic [ref=f1e3]:
+          - generic [ref=f1e7]:
+            - heading "Consulta Nota" [level=6] [ref=f1e9]
+            - link "Ajuda" [ref=f1e13] [cursor=pointer]:
+              - /url: javascript:__doPostBack('btnAjuda','')
+          - generic [ref=f1e19]:
+            - generic [ref=f1e21]:
+              - generic [ref=f1e22]: "Dados da Consulta - Última nota emitida: 29201"
+              - separator [ref=f1e23]
+              - generic [ref=f1e24]:
+                - generic [ref=f1e25]:
+                  - generic [ref=f1e26]: Série
+                  - combobox [ref=f1e27]:
+                    - option "Nota Fiscal de Serviço Eletrônica - NFS-e" [selected]
+                    - option "NFS-e - Modelo Nacional"
+                    - option "NFS-e - RESTAURADA"
+                - generic [ref=f1e28]:
+                  - generic [ref=f1e29]: N° Inicial
+                  - textbox [ref=f1e30]: "29201"
+                - generic [ref=f1e31]:
+                  - generic [ref=f1e32]: N° Final
+                  - textbox [ref=f1e33]: "29201"
+            - generic [ref=f1e35]:
+              - text: Filtros Adicionais
+              - link "" [ref=f1e36] [cursor=pointer]:
+                - /url: javascript:__doPostBack('imbArrow','')
+              - separator [ref=f1e38]
+              - text:   
+            - generic [ref=f1e39]:
+              - separator [ref=f1e40]
+              - generic [ref=f1e43]:
+                - text: Documentos Fiscais
+                - table [ref=f1e44]:
+                  - rowgroup [ref=f1e45]:
+                    - row [ref=f1e46]:
+                      - cell "N° Doc." [ref=f1e47] [cursor=pointer]
+                      - cell "Valor Nota" [ref=f1e48] [cursor=pointer]
+                      - cell "Valor Total ISSQN" [ref=f1e49] [cursor=pointer]
+                      - cell "Valor ISSQN Retido" [ref=f1e50] [cursor=pointer]
+                      - cell "ISSQN Retido" [ref=f1e51] [cursor=pointer]
+                      - cell "Data Competência" [ref=f1e52] [cursor=pointer]
+                      - cell "CPF/CNPJ" [ref=f1e53] [cursor=pointer]
+                      - cell "Razão Tomador" [ref=f1e54] [cursor=pointer]
+                      - cell "Status" [ref=f1e55] [cursor=pointer]
+                      - cell [ref=f1e56] [cursor=pointer]
+                      - cell [ref=f1e57] [cursor=pointer]
+                      - cell [ref=f1e58] [cursor=pointer]
+                      - cell [ref=f1e59] [cursor=pointer]
+                      - cell [ref=f1e60] [cursor=pointer]:
+                        - link "" [ref=f1e61]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl2$btnExportarTodosXml','')
+                      - cell [ref=f1e63] [cursor=pointer]:
+                        - link "" [ref=f1e64]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl2$btnGerarNotasPdf','')
+                      - cell [ref=f1e66] [cursor=pointer]
+                      - cell [ref=f1e67] [cursor=pointer]
+                    - row [ref=f1e68]:
+                      - cell "29201" [ref=f1e69]
+                      - cell "R$0,53" [ref=f1e70]
+                      - cell "R$0,00" [ref=f1e71]
+                      - cell "R$0,00" [ref=f1e72]
+                      - cell "Não" [ref=f1e73]
+                      - cell "09/09/2026" [ref=f1e74]
+                      - cell "76.497.338/0089-02" [ref=f1e75]
+                      - cell "ASSOCIACAO FRANCI..." [ref=f1e76]
+                      - cell "Cancelado" [ref=f1e77]
+                      - cell [ref=f1e78]:
+                        - link "" [ref=f1e79] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl3$btnImprimir','')
+                      - cell "" [ref=f1e81]
+                      - cell "" [ref=f1e84]
+                      - cell [ref=f1e87]:
+                        - link "" [ref=f1e88] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl3$imbJustificativaCancelamento','')
+                      - cell [ref=f1e90]:
+                        - link "" [ref=f1e91] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl3$btnExportarXml','')
+                      - cell [ref=f1e93]:
+                        - link "" [ref=f1e94] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl3$BtnImprimirDireto','')
+                      - cell [ref=f1e96]:
+                        - link "" [ref=f1e97] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('dgDocumentos$_ctl3$BtnEmail','')
+                      - cell [ref=f1e99]:
+                        - list [ref=f1e100]:
+                          - listitem [ref=f1e101]:
+                            - button "" [ref=f1e102] [cursor=pointer]
+                            - text:  
+                    - row [ref=f1e105]:
+                      - cell "1" [ref=f1e106]
+            - list [ref=f1e110]:
+              - listitem [ref=f1e111]
+              - listitem [ref=f1e112]:
+                - link " Localizar" [ref=f1e113] [cursor=pointer]:
+                  - /url: javascript:__doPostBack('btnLocalizar2','')
+                  - generic [ref=f1e114]: 
+                  - text: Localizar
+              - listitem [ref=f1e115]
+        - text:  

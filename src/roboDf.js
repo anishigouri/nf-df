@@ -248,10 +248,21 @@ function formatarDataBr(dataIso) {
   return `${dia}/${mes}/${ano}`;
 }
 
+// O Excel guarda "CNPJ CLIENTE" como numero quando a coluna nao esta
+// formatada como texto, e numero nao tem zero a esquerda -- um CNPJ real
+// "06980064000182" vira 6980064000182 (13 digitos) na planilha, e o site
+// nao reconhece um CNPJ incompleto. Completa com zeros a esquerda ate 14
+// digitos antes de preencher.
+function normalizarCnpj(valor) {
+  const texto = String(valor ?? "").trim();
+  if (!texto) return "";
+  return texto.padStart(14, "0");
+}
+
 // Traduz os nomes de coluna da planilha para os campos do formulario.
 function mapearDadosDaPlanilha(linha) {
   return {
-    cnpjCliente: String(linha["CNPJ CLIENTE"] ?? "").trim(),
+    cnpjCliente: normalizarCnpj(linha["CNPJ CLIENTE"]),
     descricaoServico: String(linha["DESCRIÇÃO"] ?? "").trim(),
     valorServico: linha["VALOR CONTABIL"],
   };
@@ -298,7 +309,13 @@ async function preencherFormulario(page, frame, linha, numeroLinha, dataCompeten
   // valor garante o blur/"change" real (fill() sozinho so dispara "input"),
   // igual ja fizemos com a Data de Competencia.
   await frame.fill(FORMULARIO_NOTA.descricaoServico, dados.descricaoServico);
-  await frame.fill(FORMULARIO_NOTA.valorServico, String(dados.valorServico));
+  // O campo tem uma mascara monetaria que ignora qualquer caractere
+  // nao-numerico (inclusive o "."), entao "5.3" vira "53" -> R$0,53 em vez
+  // de R$5,30 -- confirmado ao vivo em 09/09/2026 via MCP, comparando o
+  // valor final do campo com "5.3" (formato JS, quebrado) e "5,30" (formato
+  // BR, correto). Formata sempre com virgula e 2 casas antes de preencher.
+  const valorFormatado = Number(dados.valorServico).toFixed(2).replace(".", ",");
+  await frame.fill(FORMULARIO_NOTA.valorServico, valorFormatado);
   await frame.locator(FORMULARIO_NOTA.valorServico).press("Tab");
   await frame.waitForLoadState("networkidle").catch(() => {});
   // folga maior (1500ms em vez de 500ms) pra deixar o postback do Valor
@@ -421,12 +438,14 @@ async function esperarReciboOuBotaoGravar(page, frame, timeoutMs = 25000) {
 
 // Le o numero da nota direto do texto do recibo (innerText + regex) em vez
 // de um id, porque ainda so temos o screenshot desse modal, nao o HTML real.
+// Rotulo "Número da NFS-e" (modelo nacional/DANFSe v2.0) -- ver comentario
+// de ACOES.reciboRotuloNumero em seletores.js.
 async function extrairNumeroDoRecibo(contexto) {
   const texto = await contexto
     .locator("body")
     .innerText()
     .catch(() => "");
-  const match = texto.match(/N[uú]mero da Nota Fiscal\s*\n?\s*(\d+)/i);
+  const match = texto.match(/N[uú]mero da NFS-?e\s*\n?\s*(\d+)/i);
   return match ? match[1] : null;
 }
 

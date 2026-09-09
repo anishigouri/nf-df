@@ -117,6 +117,14 @@ export const ACOES = {
   // desse modal (so o screenshot), por isso o numero e lido "no bruto" via
   // innerText + regex em vez de um id (ver extrairNumeroDoRecibo em
   // roboDf.js) -- e mais resiliente a nao sabermos a estrutura exata.
-  reciboRotuloNumero: "text=Número da Nota Fiscal",
+  //
+  // O site trocou o formulario de nota pro modelo nacional (DANFSe v2.0,
+  // NotaNacional.aspx) em algum momento antes de 09/09/2026, e o recibo
+  // mudou o rotulo de "Número da Nota Fiscal" pra "Número da NFS-e"
+  // (confirmado por screenshot real em 09/09/2026, erro_gravar_linha_4.png)
+  // -- com o rotulo antigo, o robo nunca detectava o recibo, deixava ele
+  // aberto bloqueando a proxima nota do lote, e reportava erro numa nota que
+  // na verdade tinha sido emitida com sucesso.
+  reciboRotuloNumero: "text=Número da NFS-e",
   reciboBotaoFechar: "text=Fechar",
 };
