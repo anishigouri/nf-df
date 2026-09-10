@@ -4,6 +4,14 @@ import TelaLogin from "./TelaLogin.jsx";
 
 const CHAVE_SESSAO = "nfdf_credenciais";
 
+// Build de producao (client/dist, gerado por "vite build" e servido pelo
+// Express -- ver Dockerfile e server/index.js) tem import.meta.env.PROD
+// true; "vite dev" usado em desenvolvimento local tem false. Em producao
+// nem mostra as opcoes de dry-run/limite de notas: sempre processa a
+// planilha inteira pra valer (o servidor tambem forca isso, ver
+// server/rotas.js, entao isso aqui e so pra nao nem oferecer a opcao).
+const IS_PRODUCTION = import.meta.env.PROD;
+
 const ETAPAS = [
   { chave: "upload", rotulo: "Enviar" },
   { chave: "configurar", rotulo: "Configurar" },
@@ -229,15 +237,17 @@ export default function App() {
       setErro("Informe a data da competência.");
       return;
     }
-    const calculado = limite ? Math.min(job.totalPendentes, Number(limite)) : job.totalPendentes;
+    const limiteEfetivo = IS_PRODUCTION ? null : limite ? Number(limite) : null;
+    const dryRunEfetivo = IS_PRODUCTION ? false : dryRun;
+    const calculado = limiteEfetivo ? Math.min(job.totalPendentes, limiteEfetivo) : job.totalPendentes;
     setTotalRodada(calculado);
     try {
       const resp = await fetch(`/api/jobs/${job.id}/iniciar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          limite: limite ? Number(limite) : null,
-          dryRun,
+          limite: limiteEfetivo,
+          dryRun: dryRunEfetivo,
           dataCompetencia,
           login: credenciais.login,
           senha: credenciais.senha,
@@ -358,32 +368,36 @@ export default function App() {
                   encontrada(s) na planilha.
                 </p>
 
-                <div className="linha-toggle">
-                  <div className="linha-toggle-texto">
-                    <span className="linha-toggle-titulo">Modo dry-run</span>
-                    <span className="linha-toggle-detalhe">Preenche o formulário mas não grava a nota</span>
-                  </div>
-                  <button
-                    type="button"
-                    className={`toggle ${dryRun ? "ligado" : ""}`}
-                    onClick={() => setDryRun((v) => !v)}
-                    aria-pressed={dryRun}
-                  >
-                    <span className="toggle-bolinha" />
-                  </button>
-                </div>
+                {!IS_PRODUCTION && (
+                  <>
+                    <div className="linha-toggle">
+                      <div className="linha-toggle-texto">
+                        <span className="linha-toggle-titulo">Modo dry-run</span>
+                        <span className="linha-toggle-detalhe">Preenche o formulário mas não grava a nota</span>
+                      </div>
+                      <button
+                        type="button"
+                        className={`toggle ${dryRun ? "ligado" : ""}`}
+                        onClick={() => setDryRun((v) => !v)}
+                        aria-pressed={dryRun}
+                      >
+                        <span className="toggle-bolinha" />
+                      </button>
+                    </div>
 
-                <div className="campo">
-                  <label htmlFor="limite">Limite de notas (vazio = todas)</label>
-                  <input
-                    id="limite"
-                    type="number"
-                    min="1"
-                    placeholder="todas"
-                    value={limite}
-                    onChange={(e) => setLimite(e.target.value)}
-                  />
-                </div>
+                    <div className="campo">
+                      <label htmlFor="limite">Limite de notas (vazio = todas)</label>
+                      <input
+                        id="limite"
+                        type="number"
+                        min="1"
+                        placeholder="todas"
+                        value={limite}
+                        onChange={(e) => setLimite(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="campo">
                   <label htmlFor="dataCompetencia">Data da competência</label>

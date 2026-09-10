@@ -4,10 +4,11 @@ import path from "node:path";
 import express from "express";
 import multer from "multer";
 
+import * as config from "../src/config.js";
 import { carregarNotasPendentes } from "../src/planilha.js";
 import { criarJob, iniciarJob, JobJaRodandoError, obterJob, snapshotJob } from "./gerenciadorJobs.js";
 
-const PASTA_UPLOADS = "uploads";
+export const PASTA_UPLOADS = "uploads";
 mkdirSync(PASTA_UPLOADS, { recursive: true });
 
 const upload = multer({
@@ -38,8 +39,17 @@ rotas.get("/jobs/:jobId", (req, res) => {
 });
 
 rotas.post("/jobs/:jobId/iniciar", express.json(), (req, res) => {
-  const { limite = null, dryRun = false, dataCompetencia = null, login, senha } = req.body ?? {};
+  let { limite = null, dryRun = false, dataCompetencia = null, login, senha } = req.body ?? {};
   if (!login || !senha) return res.status(400).json({ erro: "Login e senha sao obrigatorios." });
+
+  // Em producao processa sempre o lote inteiro, pra valer -- dry-run e
+  // limite parcial sao so ferramentas de depuracao/teste, e o front nem
+  // oferece essas opcoes (ver client/src/App.jsx), mas forca aqui tambem
+  // caso alguem chame a API direto.
+  if (config.IS_PRODUCTION) {
+    limite = null;
+    dryRun = false;
+  }
 
   try {
     const job = iniciarJob(req.params.jobId, { limite, dryRun, dataCompetencia, credenciais: { login, senha } });
@@ -82,5 +92,13 @@ rotas.get("/jobs/:jobId/eventos", (req, res) => {
 rotas.get("/jobs/:jobId/planilha", (req, res) => {
   const job = obterJob(req.params.jobId);
   if (!job) return res.status(404).json({ erro: "Job nao encontrado." });
-  res.download(path.resolve(job.caminhoPlanilha), "notas.xlsx");
+
+  // Em producao o arquivo pode ja ter sido apagado pela limpeza periodica
+  // (ver server/limpezaUploads.js) se o download demorou demais -- responde
+  // com um erro claro em vez de deixar o res.download estourar um 500 generico.
+  res.download(path.resolve(job.caminhoPlanilha), "notas.xlsx", (err) => {
+    if (err && !res.headersSent) {
+      res.status(410).json({ erro: "Planilha nao esta mais disponivel para download (expirou)." });
+    }
+  });
 });

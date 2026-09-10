@@ -2,10 +2,17 @@ import path from "node:path";
 
 import express from "express";
 
-import { rotas } from "./rotas.js";
+import * as config from "../src/config.js";
+import { iniciarLimpezaPeriodica } from "./limpezaUploads.js";
+import { PASTA_UPLOADS, rotas } from "./rotas.js";
 
 const PORTA = Number(process.env.PORT ?? 3001);
 const PASTA_CLIENT_BUILD = path.resolve("client/dist");
+
+// Em desenvolvimento os uploads ficam guardados pra sempre (ver
+// server/limpezaUploads.js) -- so em producao ha risco real de disco
+// acumulando com o tempo.
+if (config.IS_PRODUCTION) iniciarLimpezaPeriodica(PASTA_UPLOADS);
 
 const app = express();
 app.use("/api", rotas);

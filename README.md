@@ -90,9 +90,25 @@ e clique em "Iniciar". A tabela de progresso atualiza linha a linha em tempo
 real (via Server-Sent Events); ao final dá pra baixar a planilha já com a
 coluna `NOTA` atualizada.
 
-Em produção, basta rodar `npm run build` dentro de `client/` e depois
-`npm start` na raiz — o próprio Express passa a servir os arquivos estáticos
-do build em `client/dist`.
+Em desenvolvimento (`NODE_ENV` indefinido, que é o caso rodando os comandos
+acima) o robô também salva screenshot + texto da página em `screenshots/` a
+cada passo relevante (erro, dry-run, nota gravada) — útil pra depurar, mas os
+arquivos se acumulam com o tempo. Os `.xlsx` enviados em `uploads/` também
+ficam guardados pra sempre.
+
+Em produção (`NODE_ENV=production`, já fixado pelo [Dockerfile](Dockerfile))
+o comportamento muda de propósito, pra não acumular disco no servidor: o
+robô nunca salva screenshot/texto de evidência, o front nem mostra as opções
+de `dry-run`/limite de notas (sempre processa o lote inteiro pra valer — o
+backend também recusa essas opções, mesmo via chamada direta da API), e os
+arquivos de `uploads/` são apagados automaticamente algumas horas depois de
+enviados (ver [server/limpezaUploads.js](server/limpezaUploads.js)), tempo
+de sobra pra baixar a planilha processada.
+
+Pra rodar localmente simulando produção (com esse comportamento), rode
+`npm run build` dentro de `client/` e depois `NODE_ENV=production npm start`
+na raiz — o próprio Express passa a servir os arquivos estáticos do build em
+`client/dist`.
 
 ## 4. Deploy no Render
 

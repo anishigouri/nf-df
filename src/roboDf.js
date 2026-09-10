@@ -14,7 +14,26 @@ import * as config from "./config.js";
 import { ACOES, EMPRESAS, FORMULARIO_NOTA, LOGIN, MENU, MODAL_ATENCAO, POPUP_CADASTRO, VALORES_FIXOS } from "./seletores.js";
 
 const PASTA_SCREENSHOTS = "screenshots";
-mkdirSync(PASTA_SCREENSHOTS, { recursive: true });
+if (!config.IS_PRODUCTION) mkdirSync(PASTA_SCREENSHOTS, { recursive: true });
+
+// Screenshot/texto de evidencia (estado da tela em erros, ou da nota
+// gravada) so existem em desenvolvimento -- em producao viram no-op, pra
+// nao acumular arquivo em disco sem limite. Retornam o caminho salvo (ou
+// null em producao) pra quem chamar decidir se menciona esse caminho na
+// mensagem de erro.
+async function salvarScreenshot(page, nomeArquivo) {
+  if (config.IS_PRODUCTION) return null;
+  const caminho = path.join(PASTA_SCREENSHOTS, nomeArquivo);
+  await page.screenshot({ path: caminho, fullPage: true }).catch(() => {});
+  return caminho;
+}
+
+function salvarTexto(nomeArquivo, conteudo) {
+  if (config.IS_PRODUCTION) return null;
+  const caminho = path.join(PASTA_SCREENSHOTS, nomeArquivo);
+  writeFileSync(caminho, conteudo);
+  return caminho;
+}
 
 export class ErroEmissaoNota extends Error {}
 
@@ -153,8 +172,7 @@ async function clicarGrupoNotaEletronica(page) {
     await locator.click({ timeout: 8000 });
     return;
   } catch {
-    const caminhoPrint = path.join(PASTA_SCREENSHOTS, "erro_menu_nota_eletronica.png");
-    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    await salvarScreenshot(page, "erro_menu_nota_eletronica.png");
     await page.goto(page.url(), { waitUntil: "networkidle" });
     await page.waitForTimeout(1000);
     await locator.click();
@@ -172,9 +190,10 @@ export async function abrirFormularioNovaNota(page) {
   // demorar mais que isso pra aparecer dependendo da resposta do site.
   const frame = await esperarFrame(page, (f) => f.url().includes("NotaNacional.aspx"), 15000);
   if (!frame) {
-    const caminhoPrint = path.join(PASTA_SCREENSHOTS, "erro_iframe_nova_nota.png");
-    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
-    throw new ErroEmissaoNota(`Nao encontrei o iframe da Nova Nota Eletronica. Screenshot salvo em ${caminhoPrint}.`);
+    const caminhoPrint = await salvarScreenshot(page, "erro_iframe_nova_nota.png");
+    throw new ErroEmissaoNota(
+      `Nao encontrei o iframe da Nova Nota Eletronica.${caminhoPrint ? ` Screenshot salvo em ${caminhoPrint}.` : ""}`
+    );
   }
   await frame.waitForLoadState("networkidle").catch(() => {});
   return frame;
@@ -474,22 +493,18 @@ async function preencherFormulario(page, frame, linha, numeroLinha, dataCompeten
     await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
     await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
   } catch (err) {
-    const caminhoPrint = path.join(PASTA_SCREENSHOTS, `erro_cascata_linha_${numeroLinha}.png`);
-    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    const caminhoPrint = await salvarScreenshot(page, `erro_cascata_linha_${numeroLinha}.png`);
+    const sufixoScreenshot = caminhoPrint ? ` Screenshot do estado real salvo em ${caminhoPrint}.` : "";
     const modalAtencao = page.locator(MODAL_ATENCAO.seletor).first();
     const modalAtencaoApareceu = await modalAtencao.isVisible().catch(() => false);
     if (modalAtencaoApareceu) {
       const mensagem = await modalAtencao.innerText().catch(() => "(nao consegui ler o texto do modal)");
       await page.locator(MODAL_ATENCAO.botaoOk).first().click().catch(() => {});
       throw new ErroEmissaoNota(
-        `Site recusou um campo da cascata de tributacao (linha ${numeroLinha}): ${mensagem.trim()}. ` +
-          `Screenshot do estado real salvo em ${caminhoPrint}.`
+        `Site recusou um campo da cascata de tributacao (linha ${numeroLinha}): ${mensagem.trim()}.${sufixoScreenshot}`
       );
     }
-    throw new ErroEmissaoNota(
-      `Falha na cascata de tributacao (linha ${numeroLinha}): ${err.message}. ` +
-        `Screenshot do estado real salvo em ${caminhoPrint}.`
-    );
+    throw new ErroEmissaoNota(`Falha na cascata de tributacao (linha ${numeroLinha}): ${err.message}.${sufixoScreenshot}`);
   }
 
   if (dataCompetencia) {
@@ -626,9 +641,10 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
   await preencherFormulario(page, frame, linha, numeroLinha, dataCompetencia);
 
   if (dryRun) {
-    const caminhoPrint = path.join(PASTA_SCREENSHOTS, `dry_run_linha_${numeroLinha}.png`);
-    await page.screenshot({ path: caminhoPrint, fullPage: true });
-    return `[DRY-RUN] formulario preenchido, screenshot em ${caminhoPrint}`;
+    const caminhoPrint = await salvarScreenshot(page, `dry_run_linha_${numeroLinha}.png`);
+    return caminhoPrint
+      ? `[DRY-RUN] formulario preenchido, screenshot em ${caminhoPrint}`
+      : `[DRY-RUN] formulario preenchido (screenshot desativado em producao).`;
   }
 
   // Ate aqui nada e definitivo -- clicar em Gravar so abre o modal de
@@ -708,29 +724,29 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
     }
     await frame.waitForTimeout(2000);
   } catch (err) {
-    const caminhoPrint = path.join(PASTA_SCREENSHOTS, `erro_gravar_linha_${numeroLinha}.png`);
-    await page.screenshot({ path: caminhoPrint, fullPage: true }).catch(() => {});
+    const caminhoPrint = await salvarScreenshot(page, `erro_gravar_linha_${numeroLinha}.png`);
+    const sufixoScreenshot = caminhoPrint ? ` Screenshot do estado real salvo em ${caminhoPrint}.` : "";
     if (err instanceof ErroEmissaoNota) {
-      throw new ErroEmissaoNota(`${err.message} Screenshot do estado real salvo em ${caminhoPrint}.`);
+      throw new ErroEmissaoNota(`${err.message}${sufixoScreenshot}`);
     }
     throw new ErroEmissaoNota(
-      `Falha ao clicar em Gravar/confirmar assinatura (linha ${numeroLinha}): ${err.message}. ` +
-        `Screenshot do estado real salvo em ${caminhoPrint}.`
+      `Falha ao clicar em Gravar/confirmar assinatura (linha ${numeroLinha}): ${err.message}.${sufixoScreenshot}`
     );
   }
 
   // A partir daqui a nota MUITO provavelmente ja foi gravada de verdade no
-  // site -- sempre guarda evidencia (screenshot + texto da pagina), mesmo
-  // que o seletor do numero abaixo nao bata, pra nunca perder o numero da
-  // nota emitida.
-  const caminhoPrintFinal = path.join(PASTA_SCREENSHOTS, `nota_real_linha_${numeroLinha}.png`);
-  await page.screenshot({ path: caminhoPrintFinal, fullPage: true }).catch(() => {});
+  // site -- em desenvolvimento sempre guarda evidencia (screenshot + texto
+  // da pagina), mesmo que o seletor do numero abaixo nao bata, pra nunca
+  // perder o numero da nota emitida. Em producao essa evidencia fica
+  // desligada (decisao explicita: aceitar o risco de nao conseguir recuperar
+  // o numero se a leitura automatica falhar, em troca de nao acumular
+  // arquivo em disco a cada nota do lote).
+  const caminhoPrintFinal = await salvarScreenshot(page, `nota_real_linha_${numeroLinha}.png`);
   const textoPagina = await frame
     .locator("body")
     .innerText()
     .catch(() => "");
-  const caminhoTexto = path.join(PASTA_SCREENSHOTS, `nota_real_linha_${numeroLinha}.txt`);
-  writeFileSync(caminhoTexto, textoPagina);
+  const caminhoTexto = salvarTexto(`nota_real_linha_${numeroLinha}.txt`, textoPagina);
 
   // Se o numero ja veio do recibo (ver contextoRecibo acima), nao ha o que
   // procurar mais -- o "Fechar" ja fechou aquele modal, entao #lblNumNota
@@ -740,11 +756,13 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
   try {
     await frame.waitForSelector(ACOES.numeroNotaGerada, { timeout: 20000 });
   } catch {
+    const ondeConferir = caminhoPrintFinal
+      ? `confira o screenshot (${caminhoPrintFinal}) e o texto da pagina (${caminhoTexto}) pra pegar o numero`
+      : "acesse o site diretamente (Consulta Nota Eletronica) pra pegar o numero -- evidencia em disco esta desligada em producao";
     throw new ErroEmissaoNota(
       `Gravar foi confirmado mas nao consegui achar o numero da nota automaticamente (linha ${numeroLinha}). ` +
-        `A nota MUITO provavelmente foi emitida -- confira o screenshot (${caminhoPrintFinal}) e o texto da ` +
-        `pagina (${caminhoTexto}) pra pegar o numero e preencher a coluna NOTA manualmente (senao a linha ` +
-        `continua "pendente" e pode ser emitida de novo, duplicada, num proximo lote).`
+        `A nota MUITO provavelmente foi emitida -- ${ondeConferir} e preencher a coluna NOTA manualmente (senao a ` +
+        `linha continua "pendente" e pode ser emitida de novo, duplicada, num proximo lote).`
     );
   }
 
