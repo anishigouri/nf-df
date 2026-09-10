@@ -225,6 +225,33 @@ async function selecionarEEsperar(frame, seletor, valor, esperaExtraMs = 800) {
   await frame.waitForTimeout(esperaExtraMs);
 }
 
+// "Tipo de Retencao do ISSQN" normalmente vem com "Nao Retido" (valor fixo
+// em VALORES_FIXOS) pre-selecionado, e so selecionamos nos de novo como
+// garantia explicita -- exceto que, pra tomadores cujo regime tributario
+// cadastrado no site exige retencao, o proprio site ja deixa "Retido pelo
+// Tomador" como UNICA opcao disponivel (confirmado ao vivo em 10/09/2026
+// com 2 clientes reais que travavam sempre nesse ponto, CNPJs
+// 1637895007498 e 60746948003723 -- inspecionando o <select> na hora do
+// travamento, so existia a opcao "2 - Retido pelo Tomador", nunca "1").
+// Forcar o valor fixo nesse caso faz o Playwright esperar pra sempre por uma
+// opcao que nunca vai aparecer. Em vez disso, so forca "Nao Retido" quando
+// essa opcao realmente existir; senao aceita o que o site ja determinou --
+// mesma logica que ja usamos pra Tributacao do ISSQN e Regime Especial, que
+// tambem vem definidos pelo cadastro do tomador, nao por um valor fixo
+// nosso.
+async function selecionarTipoRetencaoISSQN(frame, esperaExtraMs) {
+  const seletor = FORMULARIO_NOTA.ddlTipoRetencaoISSQN;
+  const valorPadrao = VALORES_FIXOS.tipoRetencaoISSQN;
+  const opcoesDisponiveis = await frame
+    .locator(seletor)
+    .evaluate((el) => Array.from(el.options).map((o) => o.value));
+  if (opcoesDisponiveis.includes(valorPadrao)) {
+    await selecionarEEsperar(frame, seletor, valorPadrao, esperaExtraMs);
+  } else {
+    await frame.waitForTimeout(esperaExtraMs);
+  }
+}
+
 // So para diagnostico: le o valor atualmente selecionado nos campos da
 // cascata de tributacao. Usado pra descobrir em que ponto exato do fluxo
 // esses campos "somem" -- confirmado por screenshot em 01/09/2026 que
@@ -263,13 +290,108 @@ function normalizarCnpj(valor) {
   return texto.padStart(14, "0");
 }
 
+// Mesmo problema do CNPJ acima (Excel guarda como numero, perde zeros a
+// esquerda) -- completa ate 8 digitos e formata com hifen, do jeito que o
+// campo CEP do site espera.
+function normalizarCep(valor) {
+  const digitos = String(valor ?? "").replace(/\D/g, "");
+  if (!digitos) return "";
+  const cep8 = digitos.padStart(8, "0");
+  return `${cep8.slice(0, 5)}-${cep8.slice(5)}`;
+}
+
 // Traduz os nomes de coluna da planilha para os campos do formulario.
 function mapearDadosDaPlanilha(linha) {
   return {
     cnpjCliente: normalizarCnpj(linha["CNPJ CLIENTE"]),
     descricaoServico: String(linha["DESCRIÇÃO"] ?? "").trim(),
     valorServico: linha["VALOR CONTABIL"],
+    // Usados so como reserva manual quando o site nao reconhece o CNPJ do
+    // tomador ou deixa o endereco dele incompleto (ver
+    // completarTomadorSeNecessario) -- normalmente o proprio site
+    // auto-preenche tudo isso sozinho a partir do CNPJ.
+    nomeCliente: String(linha["NOME DO CLIENTE"] ?? "").trim(),
+    cepCliente: normalizarCep(linha["CEP"]),
+    enderecoCliente: String(linha["ENDERECO DO CLIENTE"] ?? "").trim(),
+    numeroCliente: String(linha["NUMERO"] ?? "").trim(),
+    complementoCliente: String(linha["COMPLEMENTO"] ?? "").trim(),
+    bairroCliente: String(linha["BAIRRO"] ?? "").trim(),
+    municipioCliente: String(linha["NOME DO MUNICIPIO"] ?? "").trim(),
+    ufCliente: String(linha["UFC"] ?? "").trim(),
   };
+}
+
+// Forca um valor em campos <input readonly> do site (Logradouro/Cidade/UF do
+// tomador) -- readonly bloqueia frame.fill() ("Element is not editable"),
+// mas o proprio site so usa isso pra impedir digitacao manual do usuario, o
+// valor em si pode ser setado via JS sem problema (confirmado ao vivo em
+// 10/09/2026 via MCP: o valor fica e nao e resetado por nenhum postback
+// seguinte).
+async function forcarValorCampo(frame, seletor, valor) {
+  await frame.locator(seletor).evaluate((el, valor) => {
+    el.value = valor;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }, valor);
+}
+
+// Depois de preencher o CNPJ do tomador, o site normalmente auto-preenche
+// Razao Social e endereco sozinho. Dois casos reais confirmados ao vivo em
+// 10/09/2026 (lote de 500) quebram essa expectativa: (1) CNPJ nao cadastrado
+// no site -- tudo fica vazio; (2) CNPJ cadastrado mas com o endereco
+// incompleto -- Razao Social e Numero vem preenchidos, mas Logradouro/CEP/
+// Bairro/Cidade/UF ficam vazios, e o site recusa o Gravar com "E necessario
+// preencher o endereco do tomador do servico quando for Pessoa Juridica".
+// Em vez de falhar nesses casos, completa manualmente com os dados que ja
+// existem na planilha (mesma informacao que a area fiscal ja usa pra essas
+// notas). So mexe no que estiver realmente vazio -- nunca sobrescreve um
+// valor que o site ja preencheu sozinho.
+//
+// Nao usa a busca de CEP do proprio site (o link ao lado do campo CEP)
+// porque, testada ao vivo com um CEP real, ela devolveu um logradouro/bairro
+// genericos e errados (bateu cidade/UF, mas nao o endereco); os dados da
+// planilha sao mais confiaveis que a base de CEP do site.
+async function completarTomadorSeNecessario(frame, dados, numeroLinha) {
+  const s = FORMULARIO_NOTA;
+  const lerValor = (seletor) => frame.locator(seletor).inputValue();
+
+  const razaoSocialAtual = await lerValor(s.razaoSocialCliente);
+  if (!razaoSocialAtual) {
+    if (!dados.nomeCliente) {
+      throw new ErroEmissaoNota(
+        `CNPJ do cliente (${dados.cnpjCliente}) nao foi reconhecido pelo site e a planilha nao tem ` +
+          `NOME DO CLIENTE pra completar manualmente (linha ${numeroLinha}).`
+      );
+    }
+    await frame.fill(s.razaoSocialCliente, dados.nomeCliente);
+  }
+
+  const logradouroAtual = await lerValor(s.enderecoCliente);
+  if (!logradouroAtual) {
+    if (!dados.enderecoCliente || !dados.municipioCliente || !dados.ufCliente) {
+      throw new ErroEmissaoNota(
+        `Endereco do tomador (CNPJ ${dados.cnpjCliente}) esta incompleto no site e a planilha nao tem ` +
+          `ENDERECO DO CLIENTE/NOME DO MUNICIPIO/UFC completos pra corrigir (linha ${numeroLinha}).`
+      );
+    }
+    if (dados.cepCliente && !(await lerValor(s.cepCliente))) {
+      await frame.fill(s.cepCliente, dados.cepCliente);
+    }
+    await forcarValorCampo(frame, s.enderecoCliente, dados.enderecoCliente);
+    await forcarValorCampo(frame, s.cidadeCliente, dados.municipioCliente);
+    await forcarValorCampo(frame, s.ufCliente, dados.ufCliente);
+    if (dados.numeroCliente && !(await lerValor(s.numeroCliente))) {
+      await frame.fill(s.numeroCliente, dados.numeroCliente);
+    }
+    if (dados.complementoCliente && !(await lerValor(s.complementoCliente))) {
+      await frame.fill(s.complementoCliente, dados.complementoCliente);
+    }
+    if (dados.bairroCliente && !(await lerValor(s.bairroCliente))) {
+      await frame.fill(s.bairroCliente, dados.bairroCliente);
+    }
+  }
+
+  await frame.waitForTimeout(300);
 }
 
 /**
@@ -298,12 +420,7 @@ async function preencherFormulario(page, frame, linha, numeroLinha, dataCompeten
   await frame.waitForLoadState("networkidle").catch(() => {});
   await frame.waitForTimeout(2000);
 
-  const razaoSocialTomador = await frame.locator("#txtRazaoSocialTom").inputValue();
-  if (!razaoSocialTomador) {
-    throw new ErroEmissaoNota(
-      `CNPJ do cliente (${dados.cnpjCliente}) nao foi reconhecido pelo site (razao social nao preencheu).`
-    );
-  }
+  await completarTomadorSeNecessario(frame, dados, numeroLinha);
 
   // Descricao e Valor Total dos Servicos tambem precisam vir ANTES da
   // cascata de tributacao -- Valor Total dos Servicos e a propria Base de
@@ -353,7 +470,7 @@ async function preencherFormulario(page, frame, linha, numeroLinha, dataCompeten
     // "1" em #ddlTipoRetencao, e frame.selectOption trava em timeout
     // ("did not find some options") esperando por uma opcao que nunca aparece.
     await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlRegimeEspecial, VALORES_FIXOS.regimeEspecial);
-    await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoISSQN, VALORES_FIXOS.tipoRetencaoISSQN, 3000);
+    await selecionarTipoRetencaoISSQN(frame, 3000);
     await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlSitTribFederal, VALORES_FIXOS.situacaoTributariaPisCofins);
     await selecionarEEsperar(frame, FORMULARIO_NOTA.ddlTipoRetencaoPisCofinsCsll, VALORES_FIXOS.tipoRetencaoPisCofinsCsll, 3000);
   } catch (err) {
@@ -394,12 +511,19 @@ async function preencherFormulario(page, frame, linha, numeroLinha, dataCompeten
   const valoresFinais = await lerCascataTributacao(frame);
   const esperados = {
     ddlTribISSQN: VALORES_FIXOS.tribISSQN,
-    ddlTipoRetencaoISSQN: VALORES_FIXOS.tipoRetencaoISSQN,
     ddlRegimeEspecial: VALORES_FIXOS.regimeEspecial,
     ddlSitTribFederal: VALORES_FIXOS.situacaoTributariaPisCofins,
     ddlTipoRetencaoPisCofinsCsll: VALORES_FIXOS.tipoRetencaoPisCofinsCsll,
   };
   const divergentes = Object.entries(esperados).filter(([campo, valorEsperado]) => valoresFinais[campo] !== valorEsperado);
+  // Tipo de Retencao do ISSQN pode legitimamente divergir do valor fixo (ver
+  // selecionarTipoRetencaoISSQN acima) -- so garante que nao ficou vazio.
+  if (!valoresFinais.ddlTipoRetencaoISSQN) {
+    divergentes.push([
+      "ddlTipoRetencaoISSQN",
+      `"${VALORES_FIXOS.tipoRetencaoISSQN}" ou outro valor valido determinado pelo site`,
+    ]);
+  }
   if (divergentes.length > 0) {
     const detalhe = divergentes
       .map(([campo, valorEsperado]) => `${campo} (esperado "${valorEsperado}", encontrado "${valoresFinais[campo]}")`)

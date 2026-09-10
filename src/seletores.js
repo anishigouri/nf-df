@@ -71,9 +71,23 @@ export const FORMULARIO_NOTA = {
   // DD/MM/AAAA -- confirmado no HTML real do formulario em 01/09/2026.
   dataCompetencia: "#txtDataCompetencia",
 
-  // tomador (cliente) -- preencher so o CNPJ; nome/endereco sao auto-preenchidos
-  // pelo proprio site ao sair do campo (blur/tab)
+  // tomador (cliente) -- normalmente basta o CNPJ, nome/endereco sao
+  // auto-preenchidos pelo proprio site ao sair do campo (blur/tab). Os
+  // demais so sao usados como reserva manual quando o site nao reconhece o
+  // CNPJ ou deixa o endereco do tomador incompleto (ver
+  // completarTomadorSeNecessario em roboDf.js).
   cnpjCliente: "#txtCpfCnpjTom",
+  razaoSocialCliente: "#txtRazaoSocialTom",
+  cepCliente: "#txtCepTom",
+  // Logradouro, Cidade e UF sao <input readonly> no site (normalmente so
+  // preenchidos pela busca de CEP dele) -- so aceitam valor via JS, nunca
+  // via frame.fill().
+  enderecoCliente: "#txtEnderecoTom",
+  numeroCliente: "#txtNumeroEnderecoTom",
+  complementoCliente: "#txtComplementoTom",
+  bairroCliente: "#txtBairroTom",
+  cidadeCliente: "#txtCidadeTom",
+  ufCliente: "#txtUfTom",
 };
 
 // Modal "Atencao" que o site abre quando o Gravar e recusado (campo

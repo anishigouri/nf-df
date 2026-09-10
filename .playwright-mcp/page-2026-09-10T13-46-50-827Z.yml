@@ -1,0 +1,577 @@
+- generic [ref=f10e2]:
+  - navigation [ref=f10e3]:
+    - generic [ref=f10e8]:
+      - list [ref=f10e9]:
+        - listitem [ref=f10e10]:
+          - link "Governo do Distrito Federal Secretaria de Estado de Economia do Distrito Federal" [ref=f10e11] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=f10e12]: Governo do Distrito Federal
+            - generic [ref=f10e13]: Secretaria de Estado de Economia do Distrito Federal
+      - list [ref=f10e14]:
+        - listitem
+        - listitem [ref=f10e15]:
+          - generic [ref=f10e16]: "Status: Ativo"
+        - listitem [ref=f10e17]:
+          - 'button " Competência: Agosto 2026" [ref=f10e18] [cursor=pointer]':
+            - generic [ref=f10e19]: 
+            - text: "Competência: Agosto 2026"
+        - listitem [ref=f10e21]:
+          - button " CLARO S.A." [ref=f10e22] [cursor=pointer]:
+            - generic [ref=f10e23]: 
+            - text: CLARO S.A.
+          - text: "Insc. Municipal: 0747318102057"
+        - listitem [ref=f10e25]:
+          - link " CARLOS EDUARDO LIMA ..." [ref=f10e26] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=f10e27]: 
+            - text: CARLOS EDUARDO LIMA ...
+          - text: "Acessado em: 10/09/2026 10:38:25"
+        - listitem [ref=f10e28]:
+          - link " Sair" [ref=f10e29] [cursor=pointer]:
+            - /url: javascript:__doPostBack('btnSair','')
+  - link " Menu" [ref=f10e31] [cursor=pointer]:
+    - /url: "#menu-toggle"
+    - generic [ref=f10e32]: 
+    - text: Menu
+  - generic:
+    - generic [ref=f10e34]:
+      - generic [ref=f10e35]:
+        - link [ref=f10e36] [cursor=pointer]:
+          - /url: "#"
+          - img "Issnet Online" [ref=f10e37]
+        - generic [ref=f10e38]:
+          - textbox "Buscar no Menu IssNet" [ref=f10e39]
+          - generic [ref=f10e40]: 
+      - tabpanel [ref=f10e43]:
+        - list [ref=f10e45]:
+          - listitem [ref=f10e46]:
+            - generic [ref=f10e47]:
+              - generic [ref=f10e48] [cursor=pointer]
+              - generic [ref=f10e49]: DFE - Domicílio Fiscal Eletrônico
+            - separator [ref=f10e50]
+          - listitem [ref=f10e51]:
+            - generic [ref=f10e52]:
+              - generic [ref=f10e53] [cursor=pointer]
+              - generic [ref=f10e54]: Declaração de Serviços Prestados
+            - separator [ref=f10e55]
+          - listitem [ref=f10e56]:
+            - generic [ref=f10e57]:
+              - generic [ref=f10e58] [cursor=pointer]
+              - generic [ref=f10e59]: Declaração de Serviços Contratados
+            - separator [ref=f10e60]
+          - listitem [ref=f10e61]:
+            - generic [ref=f10e62]:
+              - generic [ref=f10e63] [cursor=pointer]
+              - generic [ref=f10e64]: Solicitação de Documentos Fiscais
+            - separator [ref=f10e65]
+          - listitem [ref=f10e66]:
+            - generic [ref=f10e67]:
+              - generic [ref=f10e68] [cursor=pointer]
+              - generic [ref=f10e69]: Guias de Recolhimento
+            - separator [ref=f10e70]
+          - listitem [ref=f10e71]:
+            - generic [ref=f10e72]:
+              - generic [ref=f10e73] [cursor=pointer]
+              - generic [ref=f10e74]: Livro Fiscal
+            - separator [ref=f10e75]
+          - listitem [ref=f10e76]:
+            - generic [ref=f10e77]:
+              - generic [ref=f10e78] [cursor=pointer]
+              - generic [ref=f10e79]: Outras Opções
+            - separator [ref=f10e80]
+          - listitem [ref=f10e81]:
+            - link "Extrato" [ref=f10e83] [cursor=pointer]:
+              - /url: ../fechamento/extratoFechamento.aspx
+            - separator [ref=f10e84]
+          - listitem [ref=f10e85]:
+            - link "Pendências" [ref=f10e87] [cursor=pointer]:
+              - /url: ../Pendencias/Pendencias.aspx
+            - separator [ref=f10e88]
+          - listitem [ref=f10e89]:
+            - generic [ref=f10e90]:
+              - generic [ref=f10e91] [cursor=pointer]
+              - generic [ref=f10e92]: Nota Eletrônica
+            - list [ref=f10e117]:
+              - listitem [ref=f10e118]:
+                - link "Nova Nota Eletrônica" [ref=f10e120] [cursor=pointer]:
+                  - /url: ../NotaDigital/NotaNacional.aspx
+                - separator [ref=f10e121]
+              - listitem [ref=f10e122]:
+                - link "Consultar Nota Eletrônica" [ref=f10e124] [cursor=pointer]:
+                  - /url: ../NotaDigital/Consulta_Nota.aspx?D8+BE+7F+46+AC+1B+F2+F5+8A+55+67+3D+E0+4C+FF+A1+82+41+EB+62+18+84+FE+28+6D+C0+FF+D4+A2+F9+C6+F2+83+2B+71+B7+61+53+28+2F+F5+6B+F1+92+C0+B6+33+43+1E+F+9B+35+98+59+47+64+
+                - separator [ref=f10e125]
+              - listitem [ref=f10e126]:
+                - link "Consultar Envio Nacional" [ref=f10e128] [cursor=pointer]:
+                  - /url: ../NotaDigital/ConsultaNotaEnvioNacional.aspx
+                - separator [ref=f10e129]
+              - listitem [ref=f10e130]:
+                - link "Consultar Solicitações de Cancelamento" [ref=f10e132] [cursor=pointer]:
+                  - /url: ../NotaDigital/consulta_cancelamento.aspx
+                - separator [ref=f10e133]
+              - listitem [ref=f10e134]:
+                - generic [ref=f10e135]:
+                  - generic [ref=f10e136] [cursor=pointer]
+                  - generic [ref=f10e137]: Solicitação de Notas em Lote
+                - separator [ref=f10e138]
+            - separator [ref=f10e93]
+          - listitem [ref=f10e94]:
+            - generic [ref=f10e95]:
+              - generic [ref=f10e96] [cursor=pointer]
+              - generic [ref=f10e97]: Recusa ISSQN Notas Tomadas
+            - separator [ref=f10e98]
+          - listitem [ref=f10e99]:
+            - generic [ref=f10e100]:
+              - generic [ref=f10e101] [cursor=pointer]
+              - generic [ref=f10e102]: Recurso dos Serv. Prestados
+            - separator [ref=f10e103]
+          - listitem [ref=f10e104]:
+            - generic [ref=f10e105]:
+              - generic [ref=f10e106] [cursor=pointer]
+              - generic [ref=f10e107]: Ajuda
+            - separator [ref=f10e108]
+      - tablist [ref=f10e109]:
+        - tab " Menu Completo" [ref=f10e110]:
+          - generic [ref=f10e111]: 
+          - text: Menu Completo
+    - iframe [active] [ref=f10e116]:
+      - generic [ref=f11e2]:
+        - generic [ref=f11e3]:
+          - generic [ref=f11e7]:
+            - heading "Emissão Nota Eletrônica" [level=6] [ref=f11e9]
+            - link "Ajuda" [ref=f11e13] [cursor=pointer]:
+              - /url: javascript:__doPostBack('btnAjuda','')
+          - generic [ref=f11e20]:
+            - generic [ref=f11e21]:
+              - generic [ref=f11e22]:
+                - generic [ref=f11e23]: "Identificação da Nota Fiscal - Última nota emitida: 29709"
+                - generic [ref=f11e25]:
+                  - generic [ref=f11e26]: "Carregar Dados da Nota Fiscal:"
+                  - generic [ref=f11e28]:
+                    - textbox "Número da Nota" [ref=f11e29]
+                    - link "" [ref=f11e31] [cursor=pointer]:
+                      - /url: javascript:__doPostBack('btnCarregaNf','')
+              - separator
+              - generic [ref=f11e33]:
+                - separator [ref=f11e34]
+                - generic [ref=f11e35]:
+                  - generic [ref=f11e36]:
+                    - generic [ref=f11e37]: Tipo Emitente
+                    - combobox [ref=f11e38]:
+                      - option "Prestador" [selected]
+                  - generic [ref=f11e39]:
+                    - generic [ref=f11e40]: Motivo Emissão Pelo Tomador/Intermediário
+                    - combobox [disabled] [ref=f11e41]:
+                      - option "Selecione" [selected]
+                      - option "Importação de Serviço"
+                  - generic [ref=f11e42]:
+                    - generic [ref=f11e43]: Série
+                    - combobox [ref=f11e44]:
+                      - option "Nota Fiscal de Serviço Eletrônica - NFS-e" [selected]
+                  - generic [ref=f11e45]:
+                    - generic [ref=f11e46]: Data da Competência
+                    - generic [ref=f11e47]:
+                      - textbox [ref=f11e48]: 10/09/2026
+                      - generic [ref=f11e49] [cursor=pointer]: 
+            - generic [ref=f11e52]:
+              - text: IDENTIFICAÇÃO DA DPS
+              - link "" [ref=f11e53] [cursor=pointer]:
+                - /url: javascript:__doPostBack('lbIdentDps','')
+              - separator [ref=f11e55]
+              - text: 
+            - generic [ref=f11e57]:
+              - text: DADOS DO PRESTADOR DE SERVIÇO
+              - separator [ref=f11e58]
+              - generic [ref=f11e60]:
+                - generic [ref=f11e61]:
+                  - generic [ref=f11e62]: Exterior
+                  - checkbox [disabled] [ref=f11e66]
+                - generic [ref=f11e67]:
+                  - generic [ref=f11e68]: CPF/CNPJ *
+                  - generic [ref=f11e69]:
+                    - textbox [ref=f11e70]: 40.432.544/0758-21
+                    - generic [ref=f11e71]: 
+                - generic [ref=f11e74]:
+                  - generic [ref=f11e75]: Inscrição Municipal
+                  - textbox [ref=f11e76]: "0747318102057"
+                - generic [ref=f11e77]:
+                  - generic [ref=f11e78]: Razão Social *
+                  - textbox [ref=f11e79]: CLARO S.A.
+                - generic [ref=f11e80]:
+                  - generic [ref=f11e81]:
+                    - generic [ref=f11e82]: Nome Fantasia
+                    - textbox [ref=f11e83]: CLARO S/A
+                  - generic [ref=f11e84]:
+                    - generic [ref=f11e85]: CEP
+                    - generic [ref=f11e86]:
+                      - textbox [ref=f11e87]: 70328-900
+                      - generic [ref=f11e88]: 
+                  - generic [ref=f11e91]:
+                    - generic [ref=f11e92]: Logradouro
+                    - textbox [ref=f11e93]: SCS QUADRA 5 BLOCO D SSL TERREO 1 AO 11 S/N
+                  - generic [ref=f11e94]:
+                    - generic [ref=f11e95]: Número
+                    - textbox [ref=f11e96]
+                - generic [ref=f11e97]:
+                  - generic [ref=f11e98]:
+                    - generic [ref=f11e99]: Complemento
+                    - textbox [ref=f11e100]
+                  - generic [ref=f11e101]:
+                    - generic [ref=f11e102]: Bairro
+                    - textbox [ref=f11e103]: ASA SUL
+                  - generic [ref=f11e104]:
+                    - generic [ref=f11e105]: Cidade
+                    - textbox [ref=f11e106]: Brasília
+                  - generic [ref=f11e107]:
+                    - generic [ref=f11e108]: UF
+                    - textbox [ref=f11e109]: DF
+                - generic [ref=f11e110]:
+                  - generic [ref=f11e111]:
+                    - generic [ref=f11e112]: Telefone
+                    - textbox [ref=f11e113]
+                  - generic [ref=f11e114]:
+                    - generic [ref=f11e115]: E-mail
+                    - textbox [ref=f11e116]: retencaotributos.iss@claro.com.br
+            - generic [ref=f11e118]:
+              - text: DADOS DO TOMADOR DE SERVIÇO
+              - separator [ref=f11e119]
+              - generic [ref=f11e120]:
+                - generic [ref=f11e121]:
+                  - generic [ref=f11e122]: Exterior
+                  - checkbox [ref=f11e126]
+                - generic [ref=f11e127]:
+                  - generic [ref=f11e128]: CPF/CNPJ *
+                  - generic [ref=f11e129]:
+                    - textbox [ref=f11e130]: "61062212000198"
+                    - link "" [ref=f11e132] [cursor=pointer]:
+                      - /url: javascript:__doPostBack('btnPesquisarTom','')
+                - generic [ref=f11e134]:
+                  - generic [ref=f11e135]: Inscrição Municipal
+                  - textbox [ref=f11e136]
+                - generic [ref=f11e137]:
+                  - generic [ref=f11e138]: Razão Social *
+                  - textbox [ref=f11e139]: Fundacao Inst. de Molestias do Apa. Digestivo e da Nutricao
+              - generic [ref=f11e140]:
+                - generic [ref=f11e141]:
+                  - generic [ref=f11e142]: Nome Fantasia
+                  - textbox [ref=f11e143]
+                - generic [ref=f11e144]:
+                  - generic [ref=f11e145]: CEP
+                  - generic [ref=f11e146]:
+                    - textbox [ref=f11e147]
+                    - link "" [ref=f11e149] [cursor=pointer]:
+                      - /url: javascript:__doPostBack('btnPesquisarCepTom','')
+                - generic [ref=f11e151]:
+                  - generic [ref=f11e152]: Logradouro
+                  - textbox [ref=f11e153]
+                - generic [ref=f11e154]:
+                  - generic [ref=f11e155]: Número
+                  - textbox [ref=f11e156]: "1450"
+              - generic [ref=f11e157]:
+                - generic [ref=f11e158]:
+                  - generic [ref=f11e159]: Complemento
+                  - textbox [ref=f11e160]
+                - generic [ref=f11e161]:
+                  - generic [ref=f11e162]: Bairro
+                  - textbox [ref=f11e163]
+                - generic [ref=f11e164]:
+                  - generic [ref=f11e165]: Cidade
+                  - textbox [ref=f11e166]
+                - generic [ref=f11e167]:
+                  - generic [ref=f11e168]: UF
+                  - textbox [ref=f11e169]
+              - generic [ref=f11e170]:
+                - generic [ref=f11e171]:
+                  - generic [ref=f11e172]: Telefone
+                  - textbox [ref=f11e173]
+                - generic [ref=f11e174]:
+                  - generic [ref=f11e175]: E-mail
+                  - textbox [ref=f11e176]
+            - generic [ref=f11e178]:
+              - text: DADOS DO INTERMEDIÁRIO DE SERVIÇO
+              - link "" [ref=f11e179] [cursor=pointer]:
+                - /url: javascript:__doPostBack('lbDadosInter','')
+              - separator [ref=f11e181]
+              - text:  
+            - generic [ref=f11e183]:
+              - text: IDENTIFICAÇÃO DOS SERVIÇOS
+              - separator [ref=f11e184]
+              - generic [ref=f11e186]:
+                - generic [ref=f11e187]: "Descrição dos Serviços* - Caracteres Restantes:"
+                - generic [ref=f11e188]: "2000"
+                - textbox [ref=f11e189]
+              - generic [ref=f11e190]:
+                - generic [ref=f11e191]:
+                  - generic [ref=f11e192]: Atividade Municipal*
+                  - combobox [ref=f11e193]:
+                    - option "Selecione" [selected]
+                    - option "103 - (2%) 1.03 - Serviços de projeto, planejamento, implantação, gerenciamento e manutenção da operação de redes de comunicação de dados."
+                    - option "104 - (2%) 1.04 - Elaboração de programas de computadores, inclusive de jogos eletrônicos, independentemente da arquitetura construtiva da máquina em que o programa é executado, incluindo tablets, smartphones e congêneres."
+                    - option "105 - (2%) 1.05 - Licenciamento ou cessão de direito de uso de programas de computação."
+                    - option "7.01 - Engenharia, agronomia, agrimensura, arquitetura, geologia, urbanismo, paisagismo e congêneres."
+                    - option "7.02 - Execução, por administração, empreitada ou subempreitada, de obras de construção civil, hidráulica ou elétrica e de outras obras semelhantes, inclusive sondagem, perfuração de poços, escavação, drenagem e irrigação, terraplanagem, pavimentação, concretagem e a instalação e montagem de produtos, peças e equipamentos (exceto o fornecimento de mercadorias produzidas pelo prestador de serviços fora do local da prestação dos serviços, que fica sujeito ao ICMS)."
+                    - option "7.03 - Elaboração de planos diretores, estudos de viabilidade, estudos organizacionais e outros, relacionados com obras e serviços de engenharia; elaboração de anteprojetos, projetos básicos e projetos executivos para trabalhos de engenharia."
+                    - option "7.05 - Reparação, conservação e reforma de edifícios, estradas, pontes, portos e congêneres (exceto o fornecimento de mercadorias produzidas pelo prestador dos serviços, fora do local da prestação dos serviços, que fica sujeito ao ICMS)."
+                    - option "7.19 - Acompanhamento e fiscalização da execução de obras de engenharia, arquitetura e urbanismo."
+                    - option "10.02 - Agenciamento, corretagem ou intermediação de títulos em geral, valores mobiliários e contratos quaisquer."
+                    - option "10.04 - Agenciamento, corretagem ou intermediação de contratos de arrendamento mercantil (leasing), de franquia (franchising) e de faturização (factoring)."
+                    - option "10.05 - Agenciamento, corretagem ou intermediação de bens móveis ou imóveis, não abrangidos em outros itens ou subitens, inclusive aqueles realizados no âmbito de Bolsas de Mercadorias e Futuros, por quaisquer meios."
+                    - option "10.08 - Agenciamento de publicidade e propaganda, inclusive o agenciamento de veiculação por quaisquer meios."
+                    - option "10.09 - Representação de qualquer natureza, inclusive comercial."
+                    - option "10.10 - Distribuição de bens de terceiros."
+                    - option "1011 - (5%) 1.01 - Análise e desenvolvimento de sistemas."
+                    - option "1021 - (5%) 1.02 - Programação."
+                    - option "1031 - (5%) 1.03 - Processamento, armazenamento ou hospedagem de dados, textos, imagens, vídeos, páginas eletrônicas, aplicativos e sistemas de informação, entre outros formatos, e congêneres."
+                    - option "1081 - (5%) 1.08 - Planejamento, confecção, manutenção e atualização de páginas eletrônicas."
+                    - option "1091 - (5%) 1.09 - Disponibilização, sem cessão definitiva, de conteúdo de áudio, vídeo, imagem e texto por meio da internet, respeitada a imunidade de livros, jornais e periódicos (exceto a distribuição de conteúdos pelas prestadoras de Serviço de Acesso Condicionado, de que trata a Lei federal nº 12.485, de 12 de setembro de 2011, sujeita ao ICMS)."
+                    - option "14.01 - Lubrificação, limpeza, lustração, revisão, carga e recarga, conserto, restauração, blindagem, manutenção e conservação de máquinas, veículos, aparelhos, equipamentos, motores, elevadores ou de qualquer objeto (exceto peças e partes empregadas, que ficam sujeitas ao ICMS)."
+                    - option "17.01 - Assessoria ou consultoria de qualquer natureza, não contida em outros itens desta lista; análise, exame, pesquisa, coleta, compilação e fornecimento de dados e informações de qualquer natureza, inclusive cadastro e similares."
+                    - option "17.02 - Datilografia, digitação, estenografia, expediente, secretaria em geral, resposta audível, redação, edição, interpretação, revisão, tradução, apoio e infra-estrutura administrativa e congêneres."
+                    - option "17.03 - Planejamento, coordenação, programação ou organização técnica, financeira ou administrativa."
+                    - option "17.08 - Franquia (franchising)."
+                    - option "17.09 - Perícias, laudos, exames técnicos e análises técnicas."
+                    - option "17.12 - Administração em geral, inclusive de bens e negócios de terceiros."
+                    - option "17.22 - Cobrança em geral."
+                    - option "17.23 - Assessoria, análise, avaliação, atendimento, consulta, cadastro, seleção, gerenciamento de informações, administração de contas a receber ou a pagar e em geral, relacionados a operações de faturização (factoring)."
+                    - option "17.25 - Inserção de textos, desenhos e outros materiais de propaganda e publicidade, em qualquer meio (exceto em livros, jornais, periódicos e nas modalidades de serviços de radiodifusão sonora e de sons e imagens de recepção livre e gratuita)."
+                    - option "23.01 - Serviços de programação e comunicação visual, desenho industrial e congêneres."
+                    - option "28.01 - Serviços de avaliação de bens e serviços de qualquer natureza."
+                    - option "31.01 - Serviços técnicos em edificações, eletrônica, eletrotécnica, mecânica, telecomunicações e congêneres."
+                    - option "9999999 - Operações de saída ou retorno de bens do estabelecimento prestador"
+                    - option "773909900 - Aluguel de outras máquinas e equipamentos comerciais e industriais não especificados anteriormente, sem operador"
+                - generic [ref=f11e194]:
+                  - generic [ref=f11e195]: Tributação Nacional*
+                  - combobox [disabled] [ref=f11e196]
+                - generic [ref=f11e197]:
+                  - generic [ref=f11e198]: NBS*
+                  - combobox [disabled] [ref=f11e199]
+              - generic [ref=f11e200]:
+                - generic [ref=f11e201]:
+                  - generic [ref=f11e202]: Valor Total dos Serviços
+                  - textbox [ref=f11e203]
+                - generic [ref=f11e204]:
+                  - generic [ref=f11e205]: Desconto Condic.
+                  - textbox [ref=f11e206]
+                - generic [ref=f11e207]:
+                  - generic [ref=f11e208]: Desconto Incondic.
+                  - textbox [ref=f11e209]
+            - generic [ref=f11e211]:
+              - text: LOCAL DA PRESTAÇÃO DO SERVIÇO
+              - separator [ref=f11e212]
+              - generic [ref=f11e213]:
+                - generic [ref=f11e214]:
+                  - generic [ref=f11e215]: País*
+                  - combobox [disabled] [ref=f11e216]
+                - generic [ref=f11e217]:
+                  - generic [ref=f11e218]: Estado
+                  - combobox [disabled] [ref=f11e219]
+                - generic [ref=f11e220]:
+                  - generic [ref=f11e221]: Cidade
+                  - combobox [disabled] [ref=f11e222]
+            - generic [ref=f11e224]:
+              - text: REGIMES DE TRIBUTAÇÃO DO PRESTADOR DE SERVIÇOS
+              - separator [ref=f11e225]
+              - generic [ref=f11e226]:
+                - generic [ref=f11e227]:
+                  - generic [ref=f11e228]: Situação perante Simples Nacional*
+                  - combobox [disabled] [ref=f11e229]
+                - generic [ref=f11e230]:
+                  - generic [ref=f11e231]: Regime Apuração Simples
+                  - combobox [disabled] [ref=f11e232]
+            - generic [ref=f11e234]:
+              - text: IMPOSTO SOBRE SERVIÇOS DE QUALQUER NATUREZA - ISSQN
+              - separator [ref=f11e235]
+              - generic [ref=f11e236]:
+                - generic [ref=f11e237]:
+                  - generic [ref=f11e238]: Tributação do ISSQN*
+                  - combobox [ref=f11e239]:
+                    - option "<Nenhum Item Selecionado>" [selected]
+                - generic [ref=f11e240]:
+                  - generic [ref=f11e241]: Tipo Imunidade
+                  - combobox [disabled] [ref=f11e242]
+                - generic [ref=f11e243]:
+                  - generic [ref=f11e244]: Tipo Suspensão Exigibilidade
+                  - combobox [disabled] [ref=f11e245]
+                - generic [ref=f11e246]:
+                  - generic [ref=f11e247]: Nº Processo Suspensão Exigibilidade
+                  - textbox [ref=f11e248]
+              - generic [ref=f11e249]:
+                - generic [ref=f11e250]:
+                  - generic [ref=f11e251]: Município Incidência (Cidade/UF)
+                  - combobox [disabled] [ref=f11e254]
+                  - combobox [disabled] [ref=f11e256]
+                - generic [ref=f11e257]:
+                  - generic [ref=f11e258]: Regime Especial de Tributação*
+                  - combobox [disabled] [ref=f11e259]
+                - generic [ref=f11e260]:
+                  - generic [ref=f11e261]: Tipo de Retenção do ISSQN
+                  - combobox [ref=f11e262]:
+                    - option "<Nenhum Item Selecionado>" [selected]
+                - generic [ref=f11e263]:
+                  - generic [ref=f11e264]: Código Obra
+                  - generic [ref=f11e265]:
+                    - textbox [ref=f11e266]
+                    - generic [ref=f11e267]: 
+                - generic [ref=f11e270]:
+                  - generic [ref=f11e271]: Deduções Base Cálc.*
+                  - generic [ref=f11e272]:
+                    - textbox [ref=f11e273]
+                    - generic [ref=f11e274]: 
+              - generic [ref=f11e277]:
+                - generic [ref=f11e278]:
+                  - generic [ref=f11e279]: ART
+                  - textbox [ref=f11e280]
+                - generic [ref=f11e281]:
+                  - generic [ref=f11e282]: Base de Cálculo do ISSQN
+                  - textbox [ref=f11e283]
+                - generic [ref=f11e284]:
+                  - generic [ref=f11e285]: Aliq. ISSQN
+                  - textbox [ref=f11e286]
+                - generic [ref=f11e287]:
+                  - generic [ref=f11e288]: Valor ISSQN
+                  - textbox [ref=f11e289]
+                - generic [ref=f11e290]:
+                  - generic [ref=f11e291]: Valor ISSQN Retido
+                  - textbox [ref=f11e292]
+            - generic [ref=f11e294]:
+              - text: INFORMAÇÕES COMPLEMENTARES
+              - separator [ref=f11e295]
+              - generic [ref=f11e296]:
+                - generic [ref=f11e297]:
+                  - generic [ref=f11e298]: "Texto Informativo - Caracteres Restantes:"
+                  - generic [ref=f11e299]: "2000"
+                  - textbox [ref=f11e300]
+                - generic [ref=f11e301]:
+                  - generic [ref=f11e302]: "Número do Pedido/Ordem de Compra/Ordem de Serviço/Projeto que Autorize a Prestação do Serviço em Operações B2B - Caracteres Restantes:"
+                  - generic [ref=f11e303]: "60"
+                  - textbox [ref=f11e304]
+            - generic [ref=f11e306]:
+              - text: TRIBUTAÇÃO FEDERAL
+              - separator [ref=f11e307]
+              - generic [ref=f11e309]:
+                - generic [ref=f11e310]: Situação Tributária do PIS/COFINS*
+                - combobox [ref=f11e311]
+            - generic [ref=f11e314]:
+              - text: VALOR APROXIMADO DOS TRIBUTOS
+              - separator [ref=f11e315]
+              - generic [ref=f11e317]:
+                - generic [ref=f11e318]: Escolha o Tipo de Informação
+                - combobox [ref=f11e319]:
+                  - option "Valores Percentuais" [selected]
+                  - option "Valores Monetários"
+            - generic [ref=f11e321]:
+              - text: IMPOSTO E CONTRIBUIÇÃO SOBRE BENS E SERVIÇOS - IBS/CBS
+              - separator [ref=f11e322]
+              - generic [ref=f11e323]:
+                - generic [ref=f11e324]:
+                  - generic [ref=f11e325]: Indicador da Operação
+                  - combobox [ref=f11e326]
+                - generic [ref=f11e327]:
+                  - generic [ref=f11e328]: Situação Tributária
+                  - combobox [disabled] [ref=f11e329]
+                - generic [ref=f11e330]:
+                  - generic [ref=f11e331]: Classificação Tributária
+                  - combobox [disabled] [ref=f11e332]
+                - generic [ref=f11e333]:
+                  - generic [ref=f11e334]: Base de Cálculo
+                  - textbox [ref=f11e335]
+              - generic [ref=f11e336]:
+                - generic [ref=f11e338]:
+                  - generic [ref=f11e339]: Município Incidência (UF/Cidade)
+                  - combobox [disabled] [ref=f11e342]
+                  - combobox [disabled] [ref=f11e344]
+                - generic [ref=f11e345]:
+                  - generic [ref=f11e346]: Tipo Ente Governamental
+                  - combobox [disabled] [ref=f11e347]
+                - generic [ref=f11e348]:
+                  - generic [ref=f11e349]: Destinatário é o Tomador do Serviço?
+                  - combobox [ref=f11e350]:
+                    - option "Sim" [selected]
+                    - option "Não"
+            - generic [ref=f11e352]:
+              - text: VALORES REFERENTES À CBS
+              - separator [ref=f11e353]
+              - generic [ref=f11e354]:
+                - generic [ref=f11e355]:
+                  - generic [ref=f11e356]: Alíquota
+                  - textbox [ref=f11e357]
+                - generic [ref=f11e358]:
+                  - generic [ref=f11e359]: Percentual da Redução de Alíquota
+                  - textbox [ref=f11e360]
+                - generic [ref=f11e361]:
+                  - generic [ref=f11e362]: Alíquota Efetiva
+                  - textbox [ref=f11e363]
+                - generic [ref=f11e364]:
+                  - generic [ref=f11e365]: Valor Total
+                  - textbox [ref=f11e366]
+            - generic [ref=f11e368]:
+              - text: VALORES REFERENTES À IBS ESTADUAL
+              - separator [ref=f11e369]
+              - generic [ref=f11e370]:
+                - generic [ref=f11e371]:
+                  - generic [ref=f11e372]: Alíquota
+                  - textbox [ref=f11e373]
+                - generic [ref=f11e374]:
+                  - generic [ref=f11e375]: Percentual da Redução de Alíquota
+                  - textbox [ref=f11e376]
+                - generic [ref=f11e377]:
+                  - generic [ref=f11e378]: Alíquota Efetiva
+                  - textbox [ref=f11e379]
+                - generic [ref=f11e380]:
+                  - generic [ref=f11e381]: Valor Total
+                  - textbox [ref=f11e382]
+            - generic [ref=f11e384]:
+              - text: VALORES REFERENTES À IBS MUNICIPAL
+              - separator [ref=f11e385]
+              - generic [ref=f11e386]:
+                - generic [ref=f11e387]:
+                  - generic [ref=f11e388]: Alíquota
+                  - textbox [ref=f11e389]
+                - generic [ref=f11e390]:
+                  - generic [ref=f11e391]: Percentual da Redução de Alíquota
+                  - textbox [ref=f11e392]
+                - generic [ref=f11e393]:
+                  - generic [ref=f11e394]: Alíquota Efetiva
+                  - textbox [ref=f11e395]
+                - generic [ref=f11e396]:
+                  - generic [ref=f11e397]: Valor Total
+                  - textbox [ref=f11e398]
+            - generic [ref=f11e400]:
+              - text: TOTALIZADORES
+              - separator [ref=f11e401]
+              - generic [ref=f11e402]:
+                - generic [ref=f11e403]:
+                  - generic [ref=f11e404]: Valor Total de Retenções
+                  - textbox [ref=f11e405]
+                - generic [ref=f11e406]:
+                  - generic [ref=f11e407]: Valor Total CBS
+                  - textbox [ref=f11e408]
+                - generic [ref=f11e409]:
+                  - generic [ref=f11e410]: Valor Total IBS
+                  - textbox [ref=f11e411]
+                - generic [ref=f11e412]:
+                  - generic [ref=f11e413]: Valor Líquido
+                  - textbox [ref=f11e414]
+                - generic [ref=f11e415]:
+                  - generic [ref=f11e416]: Valor Total da Nota Fiscal - IBS/CBS
+                  - textbox [ref=f11e417]
+            - list [ref=f11e421]:
+              - listitem [ref=f11e422]:
+                - link " Visualizar" [ref=f11e423] [cursor=pointer]:
+                  - /url: javascript:__doPostBack('btnVisualizar','')
+                  - generic [ref=f11e424]: 
+                  - text: Visualizar
+              - listitem [ref=f11e425]
+              - listitem [ref=f11e426]:
+                - link " Gravar" [ref=f11e427] [cursor=pointer]:
+                  - /url: javascript:__doPostBack('btnAssinar','')
+                  - generic [ref=f11e428]: 
+                  - text: Gravar
+              - listitem [ref=f11e429]
+              - listitem
+              - listitem [ref=f11e430]:
+                - link " Gravar e Enviar Email" [ref=f11e431] [cursor=pointer]:
+                  - /url: javascript:__doPostBack('btnAssinarEnviarEmail','')
+                  - generic [ref=f11e432]: 
+                  - text: Gravar e Enviar Email
+              - listitem
+        - text:        

@@ -1,0 +1,286 @@
+- generic [ref=f8e2]:
+  - navigation [ref=f8e3]:
+    - generic [ref=f8e8]:
+      - list [ref=f8e9]:
+        - listitem [ref=f8e10]:
+          - link "Governo do Distrito Federal Secretaria de Estado de Economia do Distrito Federal" [ref=f8e11] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=f8e12]: Governo do Distrito Federal
+            - generic [ref=f8e13]: Secretaria de Estado de Economia do Distrito Federal
+      - list [ref=f8e14]:
+        - listitem
+        - listitem [ref=f8e15]:
+          - generic [ref=f8e16]: "Status: Ativo"
+        - listitem [ref=f8e17]:
+          - 'button " Competência: Agosto 2026" [ref=f8e18] [cursor=pointer]':
+            - generic [ref=f8e19]: 
+            - text: "Competência: Agosto 2026"
+        - listitem [ref=f8e21]:
+          - button " CLARO S.A." [ref=f8e22] [cursor=pointer]:
+            - generic [ref=f8e23]: 
+            - text: CLARO S.A.
+          - text: "Insc. Municipal: 0747318102057"
+        - listitem [ref=f8e25]:
+          - link " CARLOS EDUARDO LIMA ..." [ref=f8e26] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=f8e27]: 
+            - text: CARLOS EDUARDO LIMA ...
+          - text: "Acessado em: 10/09/2026 10:56:40"
+        - listitem [ref=f8e28]:
+          - link " Sair" [ref=f8e29] [cursor=pointer]:
+            - /url: javascript:__doPostBack('btnSair','')
+  - link " Menu" [ref=f8e31] [cursor=pointer]:
+    - /url: "#menu-toggle"
+    - generic [ref=f8e32]: 
+    - text: Menu
+  - generic:
+    - generic [ref=f8e34]:
+      - generic [ref=f8e35]:
+        - link [ref=f8e36] [cursor=pointer]:
+          - /url: "#"
+          - img "Issnet Online" [ref=f8e37]
+        - generic [ref=f8e38]:
+          - textbox "Buscar no Menu IssNet" [ref=f8e39]
+          - generic [ref=f8e40]: 
+      - tabpanel [ref=f8e43]:
+        - list [ref=f8e45]:
+          - listitem [ref=f8e46]:
+            - generic [ref=f8e47]:
+              - generic [ref=f8e48] [cursor=pointer]
+              - generic [ref=f8e49]: DFE - Domicílio Fiscal Eletrônico
+            - separator [ref=f8e50]
+          - listitem [ref=f8e51]:
+            - generic [ref=f8e52]:
+              - generic [ref=f8e53] [cursor=pointer]
+              - generic [ref=f8e54]: Declaração de Serviços Prestados
+            - separator [ref=f8e55]
+          - listitem [ref=f8e56]:
+            - generic [ref=f8e57]:
+              - generic [ref=f8e58] [cursor=pointer]
+              - generic [ref=f8e59]: Declaração de Serviços Contratados
+            - separator [ref=f8e60]
+          - listitem [ref=f8e61]:
+            - generic [ref=f8e62]:
+              - generic [ref=f8e63] [cursor=pointer]
+              - generic [ref=f8e64]: Solicitação de Documentos Fiscais
+            - separator [ref=f8e65]
+          - listitem [ref=f8e66]:
+            - generic [ref=f8e67]:
+              - generic [ref=f8e68] [cursor=pointer]
+              - generic [ref=f8e69]: Guias de Recolhimento
+            - separator [ref=f8e70]
+          - listitem [ref=f8e71]:
+            - generic [ref=f8e72]:
+              - generic [ref=f8e73] [cursor=pointer]
+              - generic [ref=f8e74]: Livro Fiscal
+            - separator [ref=f8e75]
+          - listitem [ref=f8e76]:
+            - generic [ref=f8e77]:
+              - generic [ref=f8e78] [cursor=pointer]
+              - generic [ref=f8e79]: Outras Opções
+            - separator [ref=f8e80]
+          - listitem [ref=f8e81]:
+            - link "Extrato" [ref=f8e83] [cursor=pointer]:
+              - /url: ../fechamento/extratoFechamento.aspx
+            - separator [ref=f8e84]
+          - listitem [ref=f8e85]:
+            - link "Pendências" [ref=f8e87] [cursor=pointer]:
+              - /url: ../Pendencias/Pendencias.aspx
+            - separator [ref=f8e88]
+          - listitem [ref=f8e89]:
+            - generic [ref=f8e90]:
+              - generic [ref=f8e91] [cursor=pointer]
+              - generic [ref=f8e92]: Nota Eletrônica
+            - separator [ref=f8e93]
+          - listitem [ref=f8e94]:
+            - generic [ref=f8e95]:
+              - generic [ref=f8e96] [cursor=pointer]
+              - generic [ref=f8e97]: Recusa ISSQN Notas Tomadas
+            - separator [ref=f8e98]
+          - listitem [ref=f8e99]:
+            - generic [ref=f8e100]:
+              - generic [ref=f8e101] [cursor=pointer]
+              - generic [ref=f8e102]: Recurso dos Serv. Prestados
+            - separator [ref=f8e103]
+          - listitem [ref=f8e104]:
+            - generic [ref=f8e105]:
+              - generic [ref=f8e106] [cursor=pointer]
+              - generic [ref=f8e107]: Ajuda
+            - separator [ref=f8e108]
+      - tablist [ref=f8e109]:
+        - tab " Menu Completo" [ref=f8e110]:
+          - generic [ref=f8e111]: 
+          - text: Menu Completo
+    - iframe [ref=f8e116]:
+      - generic [ref=f9e3]:
+        - heading "Mensagens" [level=6] [ref=f9e9]
+        - generic [ref=f9e16]:
+          - heading "Atenção:" [level=6] [ref=f9e17]
+          - generic [ref=f9e18]:
+            - generic [ref=f9e19]:
+              - generic [ref=f9e20]: "Comunicado:"
+              - generic [ref=f9e21]:
+                - text: •
+                - paragraph [ref=f9e22]:
+                  - strong [ref=f9e23]: COMUNICADO – DISPONIBILIZAÇÃO DO AMBIENTE DE PRODUÇÃO DA NFS-e NO PADRÃO NACIONAL
+                - paragraph [ref=f9e24]:
+                  - generic [ref=f9e25]:
+                    - text: A Secretaria de Estado de Economia (SEEC) informa que o ambiente de produção da NFS-e no
+                    - strong [ref=f9e26]: Padrão Nacional
+                    - text: já está disponível para utilização pelos sistemas próprios de emissão (Webservice), permitindo que contribuintes e empresas desenvolvedoras iniciem a migração gradativamente.
+                - paragraph [ref=f9e27]:
+                  - generic [ref=f9e28]:
+                    - text: Conforme o
+                    - strong [ref=f9e29]: ATO CONJUNTO RFB/CGIBS Nº 4, DE 30 DE JULHO DE 2026
+                    - text: ", a emissão da NFS-e no Padrão Nacional será"
+                    - strong [ref=f9e30]: obrigatória a partir de 01/10/2026
+                    - text: ", quando o padrão ABRASF 2.04 deixará de ser aceito no Distrito Federal."
+                - paragraph [ref=f9e31]:
+                  - strong [ref=f9e32]: "COMUNICAMOS QUE:"
+                - paragraph [ref=f9e33]:
+                  - generic [ref=f9e34]:
+                    - strong [ref=f9e35]: 1)
+                    - text: "O Webservice de produção já está disponível em:"
+                    - link "https://nfse.fazenda.df.gov.br/wsnfsenacional/nfse.asmx" [ref=f9e36] [cursor=pointer]:
+                      - /url: https://nfse.fazenda.df.gov.br/wsnfsenacional/nfse.asmx
+                - paragraph [ref=f9e37]:
+                  - generic [ref=f9e38]:
+                    - strong [ref=f9e39]: 2)
+                    - text: Até
+                    - strong [ref=f9e40]: 30/09/2026
+                    - text: ", os padrões"
+                    - strong [ref=f9e41]: Nacional
+                    - text: e
+                    - strong [ref=f9e42]: ABRASF 2.04
+                    - text: funcionarão em paralelo, permitindo uma migração planejada.
+                - paragraph [ref=f9e43]:
+                  - generic [ref=f9e44]:
+                    - strong [ref=f9e45]: 3)
+                    - text: A partir de
+                    - strong [ref=f9e46]: 01/10/2026
+                    - text: ", serão aceitos"
+                    - strong [ref=f9e47]: exclusivamente
+                    - text: documentos transmitidos no
+                    - strong [ref=f9e48]: Padrão Nacional
+                    - text: .
+                - paragraph [ref=f9e49]:
+                  - generic [ref=f9e50]:
+                    - strong [ref=f9e51]: 4)
+                    - text: "O ambiente de homologação permanece disponível para testes:"
+                    - link "https://nfse.issnetonline.com.br/wsnfsenacional/homologacao/nfse.asmx" [ref=f9e52] [cursor=pointer]:
+                      - /url: https://nfse.issnetonline.com.br/wsnfsenacional/homologacao/nfse.asmx
+                - paragraph [ref=f9e53]: Recomenda-se que a migração seja realizada o quanto antes, evitando adequações de última hora e permitindo a validação da integração em ambiente de produção.
+                - paragraph [ref=f9e54]:
+                  - generic [ref=f9e55]:
+                    - strong [ref=f9e56]: 5)
+                    - text: "Manual de Integração, XMLs de exemplo e arquivos XSD:"
+                    - link "https://www.notacontrol.com.br/download/nfse/Manual_integracao_v101.pdf" [ref=f9e57] [cursor=pointer]:
+                      - /url: https://www.notacontrol.com.br/download/nfse/Manual_integracao_v101.pdf
+                - paragraph [ref=f9e58]:
+                  - generic [ref=f9e59]:
+                    - text: "Dúvidas técnicas:"
+                    - link [ref=f9e60] [cursor=pointer]:
+                      - /url: mailto:suporte@notacontrol.com.br
+                      - strong [ref=f9e61]: suporte@notacontrol.com.br
+                    - text: .
+              - generic [ref=f9e64]:
+                - text: "Incluída por: Yago Luís, 31/07/2026"
+                - separator [ref=f9e65]
+            - generic [ref=f9e66]:
+              - generic [ref=f9e67]: Comunicado:Informações – Reforma Tributária no DF
+              - generic [ref=f9e68]:
+                - text: •
+                - heading "Prezados," [level=1] [ref=f9e69]
+                - paragraph [ref=f9e71]
+                - paragraph [ref=f9e73]:
+                  - generic [ref=f9e75]:
+                    - text: No portal de serviços da Subsecretaria da Receita do Distrito Federal (
+                    - link "https://www.receita.fazenda.df.gov.br/" [ref=f9e76] [cursor=pointer]:
+                      - /url: https://www.receita.fazenda.df.gov.br/
+                    - text: ") foi disponibilizado a Aba “Reforma Tributária” com o objetivo de centralizar as informações de interesse dos contribuintes/DF publicadas pelo:"
+                - paragraph [ref=f9e77]:
+                  - generic [ref=f9e78]: a) Comitê Gestor do Imposto sobre Bens e Serviços – CGIBS;
+                - paragraph [ref=f9e79]:
+                  - generic [ref=f9e80]: b) Portal dos Documentos Fiscais eletrônicos – DF-e, afeto ao ICMS;
+                - paragraph [ref=f9e81]:
+                  - generic [ref=f9e82]: c) Portal da Nota Fiscal de Serviço eletrônica, afeto às resoluções e notas técnicas do CGNFS-e;
+                - paragraph [ref=f9e83]:
+                  - generic [ref=f9e84]: d) Sistema de Gestão do ISS no DF – ISSnet;
+                - paragraph
+              - generic [ref=f9e87]:
+                - text: "Incluída por: Yago Luís, 11/12/2025"
+                - separator [ref=f9e88]
+            - generic [ref=f9e89]:
+              - generic [ref=f9e90]:
+                - generic [ref=f9e91]: "Comunicado:"
+                - generic [ref=f9e92]:
+                  - text: •
+                  - generic [ref=f9e93]:
+                    - heading [level=3]:
+                      - strong
+                    - generic [ref=f9e94]:
+                      - heading [level=3] [ref=f9e95]:
+                        - strong [ref=f9e96]: Comunicado – Reforma Tributária e NFS-e Padrão Nacional
+                      - paragraph [ref=f9e97]
+                      - paragraph [ref=f9e98]:
+                        - generic [ref=f9e99]:
+                          - text: A Secretaria de Estado de Economia do Distrito Federal (SEEC/DF), por meio da Subsecretaria da Receita, informa que está disponível para download o
+                          - strong [ref=f9e100]: Comunicado Oficial sobre a Reforma Tributária e a implantação da NFS-e de padrão nacional
+                          - text: no Distrito Federal.
+                      - paragraph [ref=f9e101]:
+                        - generic [ref=f9e102]:
+                          - text: O documento apresenta as
+                          - strong [ref=f9e103]: diretrizes e orientações aplicáveis aos contribuintes
+                          - text: ", em conformidade com a"
+                          - strong [ref=f9e104]: Lei Complementar Federal nº 214/2025
+                          - text: ", que torna obrigatória a emissão da NFS-e nacional a partir de"
+                          - strong [ref=f9e105]: 1º de janeiro de 2026
+                          - text: .
+                      - paragraph [ref=f9e106]:
+                        - generic [ref=f9e107]:
+                          - text: Entre os temas abordados estão as
+                          - strong [ref=f9e108]: disposições legais e operacionais da Reforma Tributária
+                          - text: ", as"
+                          - strong [ref=f9e109]: orientações para emissores de NFS-e
+                          - text: (sistema próprio, portal e MEI), o
+                          - strong [ref=f9e110]: cronograma de manuais e ambientes de teste
+                          - text: ", além dos"
+                          - strong [ref=f9e111]: canais de atendimento
+                          - text: disponíveis.
+                      - paragraph [ref=f9e112]: "Faça o download das documentações a seguir:"
+                      - list [ref=f9e113]:
+                        - listitem [ref=f9e114]:
+                          - link "[Baixar Comunicado – NFS-e Padrão Nacional (DF)]" [ref=f9e117] [cursor=pointer]:
+                            - /url: https://iss.fazenda.df.gov.br/online/Login/Login.aspx?getFile=461
+                        - listitem [ref=f9e118]:
+                          - link "[Baixar Guia Completo – Reforma Tributária e Nota Fiscal de Serviços Modelo Nacional]" [ref=f9e119] [cursor=pointer]:
+                            - /url: https://iss.fazenda.df.gov.br/online/Login/Login.aspx?getFile=463
+                        - listitem [ref=f9e121]:
+                          - link "[Baixar Manual - Integração Webservice - NFS-e Padrão Nacional]" [ref=f9e122] [cursor=pointer]:
+                            - /url: https://iss.fazenda.df.gov.br/online/Login/Login.aspx?getFile=471
+                          - text: "- Atualizado 24/11/2025"
+                    - list
+                - generic [ref=f9e126]:
+                  - text: "Incluída por: Yago Luís, 04/11/2025"
+                  - separator [ref=f9e127]
+              - generic [ref=f9e128]:
+                - generic [ref=f9e129]: "Ao Contribuinte de Inscrição Municipal: 0747318102057"
+                - generic [ref=f9e130]:
+                  - text: •
+                  - generic [ref=f9e131]: Prezado(a) contribuinte,
+                  - generic [ref=f9e136]:
+                    - text: Informarmos que, conforme as recentes alterações promovidas pelo
+                    - link "DECRETO Nº 45.111, DE 26 DE OUTUBRO DE 2023" [ref=f9e137] [cursor=pointer]:
+                      - /url: https://www.sinj.df.gov.br/sinj/Norma/b9313c3df050432f96fe8453ca833c77/Decreto_45111_26_10_2023.html
+                    - text: ", a dedução de materiais nos serviços de Construção Civil (Códigos 7.02 e 7.05) no Distrito Federal está em conformidade com a Lei Complementar 116/2003."
+                  - generic [ref=f9e139]: Esta atualização implica que será possível deduzir apenas os materiais produzidos pelo prestador do serviço fora do local da prestação dos serviços, os quais estarão sujeitos ao ICMS.
+                  - generic [ref=f9e141]: Dessa forma, o sistema não apenas continuará validando a integridade da chave da NF-e, mas também passará a validar que o emitente da NF-e referente ao material a ser deduzido seja o mesmo que o prestador do serviço.
+                - generic [ref=f9e146]:
+                  - text: "Incluída por: Governo do Distrito Federal, 06/03/2024"
+                  - separator [ref=f9e147]
+              - generic [ref=f9e148]:
+                - generic [ref=f9e149]: "Ao Contribuinte de Inscrição Municipal: 0747318102057 Recusa de ISSQN do Tomador"
+                - generic [ref=f9e150]: • Atenção.Há lançamentos gerados, referentes a documentos emitidos com ISS Retido, que foram RECUSADOS pelo tomador.Para consulta dos lançamento acesse o menu Outras Opções-> Extrato.
+                - generic [ref=f9e153]:
+                  - text: "Incluída por: Administrador, 10/07/2023"
+                  - separator [ref=f9e154]
