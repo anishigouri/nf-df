@@ -203,18 +203,22 @@ async function esperarCarregamentoSumir(frame, timeoutMs = 10000) {
 // -- esperaExtraMs deixa dar uma folga maior pra esses casos especificos em
 // vez de um timeout fixo curto pra todos.
 async function selecionarEEsperar(frame, seletor, valor, esperaExtraMs = 800) {
-  try {
-    await frame.selectOption(seletor, valor);
-  } catch (err) {
-    // O postback que habilita/popula o proximo select as vezes demora mais
-    // que o timeout padrao do Playwright (confirmado em 01/09/2026: 30s
-    // esperando #ddlTrbNacional sair de "disabled" e ganhar opcoes, logo
-    // depois de termos adicionado mais passos -- CNPJ do tomador e Valor
-    // Total -- antes do inicio da cascata). Da mais uma chance com folga
-    // maior antes de desistir de vez.
-    await frame.waitForLoadState("networkidle").catch(() => {});
-    await frame.waitForTimeout(3000);
-    await frame.selectOption(seletor, valor);
+  // O postback que habilita/popula o proximo select as vezes demora mais que
+  // o timeout padrao do Playwright (confirmado em 01/09/2026, e de novo em
+  // 10/09/2026 num lote de 500 -- quanto mais carregado o servidor do site,
+  // mais frequente). Uma unica tentativa extra nem sempre bastava (linha 34
+  // do lote de 500 ainda estourou os 30s na segunda tentativa) -- tenta ate 3
+  // vezes no total, com folga maior a cada retry, antes de desistir de vez.
+  const MAX_TENTATIVAS = 3;
+  for (let tentativa = 1; ; tentativa++) {
+    try {
+      await frame.selectOption(seletor, valor);
+      break;
+    } catch (err) {
+      if (tentativa >= MAX_TENTATIVAS) throw err;
+      await frame.waitForLoadState("networkidle").catch(() => {});
+      await frame.waitForTimeout(3000 * tentativa);
+    }
   }
   await frame.waitForLoadState("networkidle").catch(() => {});
   await esperarCarregamentoSumir(frame);
@@ -436,6 +440,44 @@ async function esperarReciboOuBotaoGravar(page, frame, timeoutMs = 25000) {
   return null;
 }
 
+// Depois do Gravar, o site pode levar mais de alguns segundos pra validar e
+// responder (mais ainda num lote grande, com o servidor sob carga) -- um
+// timeout fixo curto pra detectar o modal "Atencao" fazia o robo desistir
+// cedo demais, presumir que nao tinha Atencao, e tentar clicar direto no
+// "Nao" do modal de assinatura, que nunca chegava a aparecer -- resultando
+// num timeout de 30s inteiro no lugar errado e escondendo a mensagem real do
+// site. Poll combinado, igual esperarReciboOuBotaoGravar acima, resolve isso:
+// espera mais (20s) e reage a qual dos dois aparecer primeiro.
+//
+// Confirmado ao vivo em 10/09/2026 (MCP, lote de 500): no modelo nacional
+// (NotaNacional.aspx) o "Atencao" as vezes renderiza DENTRO do proprio
+// iframe da nota, nao mais na pagina principal por cima de tudo (que foi a
+// premissa original de MODAL_ATENCAO, de 01/09/2026, antes dessa reforma) --
+// um page.locator sozinho nunca achava, entao o poll caia sempre pro "so
+// tenta clicar em Nao" e estourava os mesmos 30s de antes. Varre todos os
+// frames da pagina (mesmo motivo do esperarReciboOuBotaoGravar) em vez de
+// assumir um escopo fixo.
+async function localizarModalAtencao(page) {
+  for (const candidato of page.frames()) {
+    if (await candidato.locator(MODAL_ATENCAO.seletor).first().isVisible().catch(() => false)) {
+      return candidato;
+    }
+  }
+  return null;
+}
+
+async function esperarAtencaoOuAssinatura(page, frame, timeoutMs = 20000) {
+  const botaoAssinatura = frame.locator(ACOES.modalAssinatura_botaoNao).first();
+  const inicio = Date.now();
+  while (Date.now() - inicio < timeoutMs) {
+    const frameAtencao = await localizarModalAtencao(page);
+    if (frameAtencao) return { tipo: "atencao", frame: frameAtencao };
+    if (await botaoAssinatura.isVisible().catch(() => false)) return { tipo: "assinatura" };
+    await page.waitForTimeout(300);
+  }
+  return null;
+}
+
 // Le o numero da nota direto do texto do recibo (innerText + regex) em vez
 // de um id, porque ainda so temos o screenshot desse modal, nao o HTML real.
 // Rotulo "Número da NFS-e" (modelo nacional/DANFSe v2.0) -- ver comentario
@@ -472,32 +514,50 @@ export async function emitirNota(page, linha, numeroLinha, { dryRun = false, dat
   // arriscar gravar de verdade.
   let numeroNotaConhecido = null;
   try {
-    await frame.locator(ACOES.botaoGravar).click();
-    await frame.waitForTimeout(1500);
+    // O site pode recusar o Gravar com um modal "Atencao" (campo obrigatorio
+    // vazio, e-mail invalido no Tomador, etc.). Se esse modal ficasse aberto
+    // sem ser fechado, a proxima nota do lote falhava tentando abrir o
+    // formulario de novo ("Nao encontrei o iframe da Nova Nota Eletronica"),
+    // porque o clique no menu nao "passava" por baixo dele -- por isso
+    // detecta e fecha (clica OK) aqui antes de seguir ou abortar.
+    //
+    // Um caso especifico de "Atencao" tem correcao automatica: o Tomador as
+    // vezes ja vem cadastrado no site com 2+ e-mails separados por ";" (nao e
+    // o robo quem digita esse campo, vem auto-preenchido pelo CNPJ), e o
+    // proprio Gravar rejeita isso como e-mail invalido (confirmado em
+    // 10/09/2026, lote de 500, erro_gravar_linha_9.png). Deixa so o primeiro
+    // e-mail e tenta Gravar de novo, no maximo 1 vez -- se a mensagem
+    // persistir (ex.: o primeiro e-mail tambem for invalido), desiste e
+    // reporta erro em vez de tentar pra sempre.
+    const MAX_TENTATIVAS_GRAVAR = 2;
+    let desfechoGravar;
+    for (let tentativa = 1; ; tentativa++) {
+      await frame.locator(ACOES.botaoGravar).click();
+      desfechoGravar = await esperarAtencaoOuAssinatura(page, frame);
+      if (desfechoGravar?.tipo !== "atencao") break;
 
-    // O site pode recusar o Gravar com um modal "Atencao" listando campos
-    // obrigatorios nao preenchidos (confirmado por screenshot em 01/09/2026
-    // -- aparenta ficar na pagina principal, cobrindo ate o menu lateral, e
-    // NAO no modal de assinatura esperado abaixo). Se esse modal ficasse
-    // aberto sem ser fechado, a proxima nota do lote falhava tentando abrir
-    // o formulario de novo ("Nao encontrei o iframe da Nova Nota
-    // Eletronica"), porque o clique no menu nao "passava" por baixo dele --
-    // por isso detecta e fecha (clica OK) aqui antes de seguir ou abortar.
-    const modalAtencao = page.locator(MODAL_ATENCAO.seletor);
-    const modalAtencaoApareceu = await modalAtencao
-      .first()
-      .waitFor({ state: "visible", timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (modalAtencaoApareceu) {
+      const frameAtencao = desfechoGravar.frame;
+      const modalAtencao = frameAtencao.locator(MODAL_ATENCAO.seletor);
       const mensagem = await modalAtencao.first().innerText().catch(() => "(nao consegui ler o texto do modal)");
-      await page.locator(MODAL_ATENCAO.botaoOk).first().click().catch(() => {});
-      throw new ErroEmissaoNota(
-        `Site recusou Gravar por campo(s) obrigatorio(s) nao preenchido(s) (linha ${numeroLinha}): ${mensagem.trim()}`
-      );
+      await frameAtencao.locator(MODAL_ATENCAO.botaoOk).first().click().catch(() => {});
+
+      const emailTomadorInvalido = /e-mail\(s\) est[aã]o inv[aá]lido/i.test(mensagem);
+      if (emailTomadorInvalido && tentativa < MAX_TENTATIVAS_GRAVAR) {
+        const campoEmail = frame.locator("#txtEmailTom");
+        const emailAtual = await campoEmail.inputValue().catch(() => "");
+        const primeiroEmail = emailAtual.split(";")[0].trim();
+        await campoEmail.fill(primeiroEmail);
+        await campoEmail.press("Tab");
+        await frame.waitForLoadState("networkidle").catch(() => {});
+        continue;
+      }
+
+      throw new ErroEmissaoNota(`Site recusou Gravar (linha ${numeroLinha}): ${mensagem.trim()}`);
     }
 
     // modal perguntando se quer assinar com certificado digital -- escolher "Nao"
+    // (se nenhum dos dois desfechos apareceu no timeout do poll, deixa o
+    // click abaixo estourar o timeout padrao do Playwright, igual antes)
     await frame.locator(ACOES.modalAssinatura_botaoNao).first().click();
     await frame.waitForTimeout(1000);
 

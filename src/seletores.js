@@ -76,15 +76,22 @@ export const FORMULARIO_NOTA = {
   cnpjCliente: "#txtCpfCnpjTom",
 };
 
-// Modal "Atencao" que o site abre quando o Gravar e recusado por campo
-// obrigatorio nao preenchido (confirmado por screenshot em 01/09/2026 --
-// aparenta ficar na pagina principal, cobrindo ate o menu lateral, entao
-// provavelmente NAO fica dentro do iframe da nota). TODO: seletores a
-// confirmar -- ainda sem acesso a uma sessao logada pra inspecionar o DOM
-// real do modal.
+// Modal "Atencao" que o site abre quando o Gravar e recusado (campo
+// obrigatorio vazio, e-mail invalido no Tomador, etc.). HTML real obtido ao
+// vivo via MCP em 10/09/2026, dentro do proprio iframe da nota: e um modal
+// Bootbox (mesmo "NC.modalGeneric()" usado no recibo, ver comentario de
+// ACOES.reciboRotuloNumero) --
+//   <div class="bootbox modal fade in" ...>
+//     <div class="modal-header"><h4 class="modal-title">Atencao</h4></div>
+//     <div class="modal-body">...</div>
+//     <div class="modal-footer">...<button class="btn btn-info nc-ok" ...>OK</button>...</div>
+//   </div>
+// O seletor por texto generico ("text=Atencao") que usavamos antes nao batia
+// de forma confiavel -- classes CSS especificas do Bootbox sao bem mais
+// robustas.
 export const MODAL_ATENCAO = {
-  seletor: 'text=Atenção',
-  botaoOk: 'button:has-text("OK"), a:has-text("OK"), input[value="OK"]',
+  seletor: '.bootbox.modal.in:has-text("Atenção")',
+  botaoOk: '.bootbox.modal.in .nc-ok',
 };
 
 export const ACOES = {
