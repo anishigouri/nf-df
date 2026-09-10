@@ -72,7 +72,10 @@ export async function abrirNavegador() {
     args.push(`--remote-debugging-port=${config.DF_DEBUG_CDP_PORT}`);
   }
   const browser = await chromium.launch({
-    headless: config.DF_HEADLESS,
+    // chromium-headless-shell nunca abre janela -- ver comentario de
+    // DF_CHROMIUM_HEADLESS_SHELL em config.js.
+    headless: config.DF_CHROMIUM_HEADLESS_SHELL ? true : config.DF_HEADLESS,
+    channel: config.DF_CHROMIUM_HEADLESS_SHELL ? "chromium-headless-shell" : undefined,
     args,
   });
   const context = await browser.newContext({

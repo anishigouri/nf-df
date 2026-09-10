@@ -21,6 +21,15 @@ export const DF_CNPJ_ESTABELECIMENTO = process.env.DF_CNPJ_ESTABELECIMENTO ?? ""
 export const DF_HEADLESS = envBool("DF_HEADLESS", true);
 export const DF_DELAY_MS = Number(process.env.DF_DELAY_MS ?? "3000");
 
+// "chromium-headless-shell" e uma build separada do Chromium, so pra uso
+// automatizado/headless -- bem menor em disco que o Chromium completo (o
+// pacote desktop distribuido, ver LEIA-ME.txt, usa isso pra caber menos:
+// ~272MB contra ~428MB do Chromium completo) mas NUNCA abre janela visivel,
+// entao DF_HEADLESS e ignorado (forcado true) quando isso esta ligado.
+// Deixar desligado no dev normal, onde DF_HEADLESS=false serve pra
+// acompanhar/depurar o navegador de verdade.
+export const DF_CHROMIUM_HEADLESS_SHELL = envBool("DF_CHROMIUM_HEADLESS_SHELL", false);
+
 // Um Chromium so, aberto pro lote inteiro, vai acumulando memoria a cada
 // nota. processarLote.js fecha e reabre o navegador a cada DF_TAMANHO_LOTE
 // notas (login + selecao de estabelecimento de novo a cada reabertura),
