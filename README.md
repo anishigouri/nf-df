@@ -129,12 +129,20 @@ Passos:
    [src/config.js](src/config.js) — esse endpoint permite qualquer processo
    local controlar o navegador).
 4. Plano: `render.yaml` está configurado com **Free** (sem custo, sem
-   cartão de crédito). Funciona para testar, mas tem só 512MB de RAM e
-   hiberna após 15min sem tráfego — o que pode derrubar um lote longo no
-   meio do processamento. Pra uso de verdade (emitir notas em volume),
-   troque pra **Starter** (US$7/mês, mais RAM e sem hibernação) direto no
-   dashboard do serviço (Settings → Instance Type) ou mudando `plan: free`
-   para `plan: starter` no `render.yaml`.
+   cartão de crédito). Tem só 512MB de RAM e hiberna após 15min sem
+   tráfego. Confirmado ao vivo em 10/09/2026 (ver histórico de commits e
+   logs do Render): mesmo com o lote dividido internamente em pedaços
+   pequenos ([src/processarLote.js](src/processarLote.js)) pra reabrir o
+   Chromium periodicamente, uma única sessão de navegador processando as
+   notas desse site (formulário pesado em JS/Telerik) já chega perto de
+   500MB sozinha — o plano free derruba o serviço no meio de qualquer lote
+   de verdade, não só em lotes longos.
+   **Atenção:** o plano **Starter** (US$7/mês) NÃO aumenta a RAM — continua
+   512MB, só ganha mais CPU e para de hibernar (confirmado na documentação
+   oficial do Render, docs/compute-plans). Pra resolver o problema de
+   memória de verdade, o plano precisa ser pelo menos o **Standard** (2GB de
+   RAM, 4x o limite atual) — confira o preço atual no dashboard do serviço
+   (Settings → Instance Type) antes de trocar, já que envolve cobrança.
 5. **Só uma instância** (`numInstances: 1`, já no `render.yaml`) — o estado
    dos jobs fica em memória de um único processo
    ([server/gerenciadorJobs.js](server/gerenciadorJobs.js)), então não dá pra

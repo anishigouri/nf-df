@@ -47,7 +47,27 @@ export class CredenciaisInvalidasError extends ErroEmissaoNota {}
  * site nem carregam e nada funciona).
  */
 export async function abrirNavegador() {
-  const args = ["--disable-blink-features=AutomationControlled"];
+  const args = [
+    "--disable-blink-features=AutomationControlled",
+    // Flags padrao de Chromium headless "enxuto" em container/Docker
+    // (confirmado como necessario ao vivo em 10/09/2026: uma unica sessao
+    // processando as notas desse site -- formulario pesado em JS/Telerik,
+    // varios iframes/postbacks -- ja chega perto de 500MB sozinha no plano
+    // de 512MB do Render, mesmo com o lote dividido em pedacos pequenos).
+    // Cada flag aqui so desliga coisa que este robo nunca usa (GPU,
+    // extensoes, audio, rede de telemetria em segundo plano, etc.) -- nao
+    // muda nada do fluxo de preenchimento/gravacao da nota.
+    "--disable-dev-shm-usage", // /dev/shm no container e pequeno demais pro Chromium usar como default
+    "--disable-gpu",
+    "--disable-extensions",
+    "--disable-background-networking",
+    "--disable-background-timer-throttling",
+    "--disable-backgrounding-occluded-windows",
+    "--disable-renderer-backgrounding",
+    "--disable-breakpad", // desliga relatorio de crash do proprio Chromium
+    "--mute-audio",
+    "--no-first-run",
+  ];
   if (config.DF_DEBUG_CDP_PORT) {
     args.push(`--remote-debugging-port=${config.DF_DEBUG_CDP_PORT}`);
   }

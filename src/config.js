@@ -22,17 +22,25 @@ export const DF_HEADLESS = envBool("DF_HEADLESS", true);
 export const DF_DELAY_MS = Number(process.env.DF_DELAY_MS ?? "3000");
 
 // Um Chromium so, aberto pro lote inteiro, vai acumulando memoria a cada
-// nota (confirmado ao vivo em 10/09/2026 num lote real de 22 notas no
-// Render: RAM subindo ate 505MB, quase estourando o limite de 512MB do
-// plano free, e o processo foi derrubado por SIGTERM no meio do lote --
-// perdendo o progresso todo, ja que o estado do job so existe em memoria).
-// Em vez de depender so de aumentar o plano, processarLote.js fecha e
-// reabre o navegador a cada DF_TAMANHO_LOTE notas (login + selecao de
-// estabelecimento de novo a cada reabertura), devolvendo a memoria do
-// Chromium anterior pro SO antes de continuar. O numero de notas processado
-// nao muda pra quem usa o sistema -- e so um detalhe interno de como o lote
-// e dividido.
-export const DF_TAMANHO_LOTE = Number(process.env.DF_TAMANHO_LOTE ?? "10");
+// nota. processarLote.js fecha e reabre o navegador a cada DF_TAMANHO_LOTE
+// notas (login + selecao de estabelecimento de novo a cada reabertura),
+// devolvendo a memoria do Chromium anterior pro SO antes de continuar. O
+// numero de notas processado nao muda pra quem usa o sistema -- e so um
+// detalhe interno de como o lote e dividido.
+//
+// Padrao 1 (fecha e reabre a CADA nota) porque, mesmo depois de eliminar o
+// reparse repetido da planilha (ver planilha.js) e enxugar os args do
+// Chromium (ver abrirNavegador em roboDf.js), um UNICO pedaco de so 5 notas
+// ainda chegou a ~490MB no plano de 512MB do Render (confirmado ao vivo em
+// 10/09/2026, 2 incidentes reais derrubando o servico) -- o formulario desse
+// site (JS/Telerik pesado, varios iframes/postbacks) parece custar memoria
+// real ja nas primeiras notas de uma sessao, entao o pedaco precisa ser bem
+// pequeno pra sobrar margem. O custo e velocidade: relogar + reselecionar o
+// estabelecimento a cada nota adiciona uns 15-30s por nota. Se isso ainda
+// nao for suficiente, o teto de 512MB do plano (Free E Starter -- so o
+// Standard tem mais RAM, ver README secao 4) provavelmente e o fator
+// limitante de verdade, nao mais o codigo.
+export const DF_TAMANHO_LOTE = Number(process.env.DF_TAMANHO_LOTE ?? "1");
 
 // So pra depuracao: expoe o Chromium via Chrome DevTools Protocol nessa
 // porta (ver abrirNavegador em roboDf.js), permitindo que uma ferramenta
