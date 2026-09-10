@@ -79,3 +79,35 @@ export async function marcarResultado(caminho, numeroLinha, { numeroNfse = null,
 
   await workbook.xlsx.writeFile(caminho);
 }
+
+// Abre a planilha UMA VEZ e devolve uma funcao pra gravar resultado nela
+// sem reabrir o arquivo do zero a cada linha -- usado no processamento em
+// lote (ver processarLote.js). marcarResultado() acima reabre (le +
+// reparseia) a planilha inteira toda vez que e chamada; num lote de
+// dezenas de notas isso significa reparsear o mesmo arquivo dezenas de
+// vezes, o que e caro em memoria (ExcelJS materializa o workbook inteiro em
+// memoria a cada parse) -- confirmado como fator real no consumo de RAM que
+// derrubou o servico no Render em 10/09/2026 (memoria subindo direto ate
+// quase o limite mesmo com o navegador sendo fechado/reaberto entre
+// pedacos do lote). Mantem marcarResultado() como esta pros outros usos
+// (ex.: retry_linhas.mjs, que so mexe em poucas linhas por vez e nao tem
+// esse problema).
+export async function abrirPlanilhaParaEscrita(caminho) {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(caminho);
+  const worksheet = workbook.worksheets[0];
+  const indices = garantirColunaErro(worksheet, indiceColunas(worksheet));
+
+  return {
+    async marcar(numeroLinha, { numeroNfse = null, erro = null }) {
+      const row = worksheet.getRow(numeroLinha);
+      if (numeroNfse) {
+        row.getCell(indices[COLUNA_NOTA]).value = numeroNfse;
+        row.getCell(indices[COLUNA_ERRO]).value = "";
+      } else {
+        row.getCell(indices[COLUNA_ERRO]).value = erro ?? "";
+      }
+      await workbook.xlsx.writeFile(caminho);
+    },
+  };
+}

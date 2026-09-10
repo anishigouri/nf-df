@@ -3,7 +3,7 @@
 // callback onEvento, pra quem chamar decidir o que fazer com cada evento.
 
 import * as config from "./config.js";
-import { carregarNotasPendentes, marcarResultado } from "./planilha.js";
+import { abrirPlanilhaParaEscrita, carregarNotasPendentes } from "./planilha.js";
 import { abrirNavegador, emitirNota, ErroEmissaoNota, fazerLogin, selecionarEstabelecimento } from "./roboDf.js";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -22,7 +22,7 @@ function dividirEmPedacos(lista, tamanho) {
 // derrubado por SIGTERM no meio do lote) -- reabrir o navegador a cada
 // DF_TAMANHO_LOTE notas (ver config.js) devolve essa memoria pro SO antes de
 // continuar, em vez de deixar crescer sem limite a sessao inteira.
-async function processarPedaco(pedaco, caminhoPlanilha, { dryRun, dataCompetencia, credenciais, indiceInicial, total }, onEvento) {
+async function processarPedaco(pedaco, planilha, { dryRun, dataCompetencia, credenciais, indiceInicial, total }, onEvento) {
   const { browser, page } = await abrirNavegador();
 
   try {
@@ -42,13 +42,13 @@ async function processarPedaco(pedaco, caminhoPlanilha, { dryRun, dataCompetenci
       try {
         const resultado = await emitirNota(page, nota.dados, nota.numeroLinha, { dryRun, dataCompetencia });
         if (!dryRun) {
-          await marcarResultado(caminhoPlanilha, nota.numeroLinha, { numeroNfse: resultado });
+          await planilha.marcar(nota.numeroLinha, { numeroNfse: resultado });
         }
         onEvento({ tipo: "linha_resultado", numeroLinha: nota.numeroLinha, status: "ok", resultado });
       } catch (err) {
         const mensagem = err instanceof ErroEmissaoNota ? err.message : `Erro inesperado: ${err.message}`;
         if (!dryRun) {
-          await marcarResultado(caminhoPlanilha, nota.numeroLinha, { erro: mensagem });
+          await planilha.marcar(nota.numeroLinha, { erro: mensagem });
         }
         onEvento({ tipo: "linha_resultado", numeroLinha: nota.numeroLinha, status: "erro", erro: mensagem });
       }
@@ -92,6 +92,11 @@ export async function processarLote(
 
   onEvento({ tipo: "inicio", total: notas.length });
 
+  // Abre a planilha UMA vez pro lote inteiro (ver comentario de
+  // abrirPlanilhaParaEscrita em planilha.js) -- evita reparsear o arquivo do
+  // zero a cada nota, que era um consumo de memoria real e desnecessario.
+  const planilha = dryRun ? null : await abrirPlanilhaParaEscrita(caminhoPlanilha);
+
   // Modo debug processa tudo numa unica sessao (ver comentario em
   // processarPedaco) -- dividir em pedacos abriria/fecharia varios
   // navegadores no meio da depuracao, o que atrapalha em vez de ajudar.
@@ -103,7 +108,7 @@ export async function processarLote(
       onEvento({ tipo: "fase", mensagem: `Iniciando lote ${i + 1}/${pedacos.length} (reabrindo o navegador)...` });
     }
     const indiceInicial = i * tamanhoLote;
-    await processarPedaco(pedacos[i], caminhoPlanilha, { dryRun, dataCompetencia, credenciais, indiceInicial, total: notas.length }, onEvento);
+    await processarPedaco(pedacos[i], planilha, { dryRun, dataCompetencia, credenciais, indiceInicial, total: notas.length }, onEvento);
   }
 
   onEvento({ tipo: "concluido" });

@@ -25,6 +25,16 @@ RUN npm run build --prefix client
 
 ENV NODE_ENV=production
 
+# Dentro de um container o V8 calcula o tamanho padrao do heap com base na
+# RAM TOTAL DA MAQUINA HOST, nao no limite do container/cgroup -- num plano
+# com 512MB (ver render.yaml), isso significa que o V8 so entra em GC mais
+# agressivo bem depois do que deveria, deixando a memoria crescer quase ate
+# o limite antes de reagir. O OOM killer do sistema mata o processo de
+# uma vez (SIGKILL/SIGTERM), sem chance de GC (confirmado ao vivo em
+# 10/09/2026: RAM subindo direto ate ~508MB e o processo caindo). Limitar o
+# heap explicitamente forca o V8 a comecar a coletar lixo bem antes disso.
+ENV NODE_OPTIONS=--max-old-space-size=384
+
 # O Render injeta a variavel PORT em runtime -- server/index.js ja le
 # process.env.PORT, entao nao precisamos fixar um valor aqui.
 CMD ["npm", "start"]
