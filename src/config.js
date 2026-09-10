@@ -21,6 +21,19 @@ export const DF_CNPJ_ESTABELECIMENTO = process.env.DF_CNPJ_ESTABELECIMENTO ?? ""
 export const DF_HEADLESS = envBool("DF_HEADLESS", true);
 export const DF_DELAY_MS = Number(process.env.DF_DELAY_MS ?? "3000");
 
+// Um Chromium so, aberto pro lote inteiro, vai acumulando memoria a cada
+// nota (confirmado ao vivo em 10/09/2026 num lote real de 22 notas no
+// Render: RAM subindo ate 505MB, quase estourando o limite de 512MB do
+// plano free, e o processo foi derrubado por SIGTERM no meio do lote --
+// perdendo o progresso todo, ja que o estado do job so existe em memoria).
+// Em vez de depender so de aumentar o plano, processarLote.js fecha e
+// reabre o navegador a cada DF_TAMANHO_LOTE notas (login + selecao de
+// estabelecimento de novo a cada reabertura), devolvendo a memoria do
+// Chromium anterior pro SO antes de continuar. O numero de notas processado
+// nao muda pra quem usa o sistema -- e so um detalhe interno de como o lote
+// e dividido.
+export const DF_TAMANHO_LOTE = Number(process.env.DF_TAMANHO_LOTE ?? "10");
+
 // So pra depuracao: expoe o Chromium via Chrome DevTools Protocol nessa
 // porta (ver abrirNavegador em roboDf.js), permitindo que uma ferramenta
 // externa (ex.: um MCP de navegador configurado com --cdp-endpoint) grude na

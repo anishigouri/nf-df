@@ -176,6 +176,27 @@ export default function App() {
       }
     });
 
+    // Sem isso, se a conexao SSE cair de vez (ex.: servidor reiniciou no
+    // meio do processamento e o job sumiu da memoria -- ver
+    // server/gerenciadorJobs.js), a tela ficava travada pra sempre sem
+    // avisar nada (confirmado ao vivo em 10/09/2026). O EventSource so
+    // dispara "error" sem tentar reconectar sozinho (readyState CLOSED)
+    // quando o servidor responde algo que nao e um stream valido (ex.: 404
+    // de job nao encontrado) -- nesse caso trata como erro fatal do job. Se
+    // for so uma falha de rede passageira, o proprio EventSource tenta
+    // reconectar (readyState CONNECTING) e aqui nao faz nada, deixa ele tentar.
+    fonte.addEventListener("error", () => {
+      if (fonte.readyState === EventSource.CLOSED) {
+        setErroFatal(
+          "Conexão com o servidor foi perdida durante o processamento (o servidor pode ter reiniciado). " +
+            "Confira abaixo quais linhas já foram processadas -- a planilha já foi atualizada até aí -- e reenvie " +
+            "o mesmo arquivo pra continuar só as linhas pendentes."
+        );
+        setStatusJob("erro");
+        setEtapa("concluido");
+      }
+    });
+
     return () => fonte.close();
   }, [etapa, job]);
 
