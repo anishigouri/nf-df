@@ -6,7 +6,8 @@
   "private": true,
   "scripts": {
     "postinstall": "playwright install chromium",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "empacotar": "node scripts/empacotar-desktop.mjs"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

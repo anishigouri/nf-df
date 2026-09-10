@@ -1,0 +1,51 @@
+SISTEMA DE LANCAMENTO DE NOTAS - ISS ONLINE DF
+================================================
+
+COMO USAR
+---------
+1. Copie esta pasta inteira (nf-df-pacote) para o computador, em qualquer
+   lugar (Area de Trabalho, Documentos, etc.). Nao precisa instalar nada.
+2. De dois cliques no arquivo "Iniciar.bat".
+3. Se o Windows mostrar um aviso azul "O Windows protegeu o computador"
+   (SmartScreen), clique em "Mais informacoes" e depois em "Executar assim
+   mesmo". Isso acontece porque o programa nao tem certificado digital
+   pago, e e normal e esperado.
+4. Uma janela preta vai abrir (o servidor) e, depois de alguns segundos, o
+   navegador abre sozinho na tela do sistema. Se o navegador nao abrir
+   sozinho, acesse http://localhost:3001 manualmente.
+5. Faca login com seu usuario e senha do proprio ISS Online DF (a mesma
+   que voce ja usa no site) e use o sistema normalmente.
+
+O sistema acessa o site do ISS Online DF sozinho, por tras dos panos --
+nao abre nenhuma outra janela de navegador durante o processamento, e
+normal nao ver nada acontecendo na tela alem da barra de progresso. O
+acompanhamento e so pela tela do proprio sistema mesmo.
+
+IMPORTANTE: NAO FECHE a janela preta (o titulo dela comeca com "NFS-e -
+servidor rodando") enquanto estiver usando o sistema -- e ela que faz tudo
+funcionar. Fechar essa janela desliga o sistema. Pode fechar a aba do
+navegador a vontade, isso nao desliga nada.
+
+COMO PARAR
+----------
+Feche a janela preta "NFS-e - servidor rodando". Pronto, esta desligado.
+Pra usar de novo, e so dar dois cliques no "Iniciar.bat" outra vez.
+
+SE DER ALGUM ERRO
+------------------
+- Tire um print (foto da tela) da janela preta -- geralmente a mensagem de
+  erro aparece nela -- e do que apareceu no navegador, e mande pra quem te
+  passou este sistema.
+- Se aparecer "modo dry-run" na tela de configurar o processamento: e um
+  modo de teste que preenche a nota mas NAO grava de verdade no site --
+  bom pra testar uma planilha nova antes de rodar pra valer. Desligue esse
+  modo (o botao fica cinza/apagado) quando for emitir as notas de verdade.
+
+O QUE TEM NESTA PASTA (nao mexer)
+-----------------------------------
+- Iniciar.bat  -> o que voce clica pra ligar o sistema
+- app\         -> o programa em si
+- node\        -> o "motor" que roda o programa (nao e o Node.js instalado
+                   no Windows, e uma copia so pra este sistema)
+- browsers\    -> o navegador automatico que o sistema usa pra acessar o
+                   site do ISS Online DF (por isso a pasta e grande)

@@ -4,3 +4,11 @@ downloads/
 screenshots/
 uploads/
 client/dist/
+.cache/
+
+# Gerado por "npm run empacotar" (ver scripts/empacotar-desktop.mjs) --
+# normalmente fica FORA do repo (pasta irma), mas ignora tambem aqui dentro
+# como seguranca, ja que um .zip de 167MB ja foi commitado por engano uma
+# vez (removido do historico local em 10/09/2026, ver git log).
+nf-df-pacote/
+nf-df-pacote.zip
