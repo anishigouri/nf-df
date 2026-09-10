@@ -51,6 +51,7 @@ async function lerEstado(caminho) {
 
 let arquivoAtual = null;
 let estadoAnterior = new Map();
+let okDesdeUltimoLog = 0;
 
 console.log(`[monitor] iniciado, observando pasta ${PASTA}/ a cada ${INTERVALO_MS}ms`);
 
@@ -63,13 +64,16 @@ async function tick() {
     console.log(`[monitor] arquivo ativo: ${arquivo}`);
     arquivoAtual = arquivo;
     estadoAnterior = new Map();
+    okDesdeUltimoLog = 0;
   }
 
   let estadoNovo;
   try {
     estadoNovo = await lerEstado(caminho);
-  } catch (err) {
-    console.log(`[monitor] falha ao ler ${arquivo} (provavelmente sendo escrito agora): ${err.message}`);
+  } catch {
+    // Arquivo sendo escrito nesse instante (marcarResultado le+grava o xlsx
+    // inteiro a cada linha) -- esperado, tenta de novo no proximo tick sem
+    // logar (senao vira ruido a cada poucas linhas num lote grande).
     return;
   }
 
@@ -80,10 +84,17 @@ async function tick() {
     if (!mudou) continue;
 
     if (atual.nota) {
-      console.log(`[OK] linha ${linha} (CNPJ ${atual.cnpj}) -> nota ${atual.nota}`);
+      okDesdeUltimoLog++;
     } else if (atual.erro) {
       console.log(`[ERRO] linha ${linha} (CNPJ ${atual.cnpj}): ${atual.erro}`);
     }
+  }
+
+  // So notifica progresso em lote (nao linha a linha, senao um lote de 500
+  // gera 500 notificacoes) -- a cada 25 OKs acumulados.
+  if (okDesdeUltimoLog >= 25) {
+    console.log(`[OK] +${okDesdeUltimoLog} notas emitidas sem erro desde o ultimo aviso`);
+    okDesdeUltimoLog = 0;
   }
   estadoAnterior = estadoNovo;
 }
